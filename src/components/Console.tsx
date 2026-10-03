@@ -147,6 +147,17 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
   const plan = run ? activePlan(run) : null;
   const [barRef, barHeight] = useElementHeight<HTMLDivElement>();
 
+  // The mobile banner and sticky approve bar are rendered only below the lg breakpoint, so the
+  // desktop DOM never carries an off-canvas duplicate of the approve button.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023.98px)");
+    const update = () => setNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   return (
     <div className={cx("flex min-h-dvh flex-col", simple ? "" : "lg:h-dvh lg:overflow-hidden")}>
       <TopBar
@@ -162,7 +173,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
         onToggleView={toggleView}
       />
       {banner}
-      {run && view === "full" ? (
+      {run && view === "full" && narrow ? (
         <div className="border-b border-line pb-3 empty:hidden lg:hidden">
           <SignatureBanner run={run} />
         </div>
@@ -222,7 +233,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
         </main>
       )}
 
-      {run && view === "full" ? (
+      {run && view === "full" && narrow ? (
         <div ref={barRef} className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-1px_0_rgba(255,255,255,0.02),0_-12px_32px_rgba(0,0,0,0.5)] lg:hidden">
           <div className="mb-2 flex items-center gap-2 text-[13px]">
             <span className="text-muted">{plan ? `Plan r${plan.revision}` : PHASE_META[run.phase].label}</span>
