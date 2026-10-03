@@ -11,7 +11,7 @@ import type { Run } from "../src/lib/contracts";
 import { EXPECTED, FIXED_NOW_ISO, fixedClock, presetRequest } from "../src/lib/fixtures";
 import { sha256Hex } from "../src/lib/hash";
 import { localProvider } from "../src/lib/providers/local";
-import { browserIntegrationStatus } from "../src/lib/browser-runtime";
+import { browserIntegrationStatus, createBrowserRuntime } from "../src/lib/browser-runtime";
 import { IntegrationStatus } from "../src/lib/contracts";
 import { createService, ValidationError } from "../src/lib/service";
 import { IdempotencyReplay, NotFound, VersionConflict, type NewEvent } from "../src/lib/store";
@@ -285,6 +285,25 @@ describe("service on the memory store", () => {
     await service.drain(run.id);
     // localStorage quotas are ~5 MB of UTF-16; stay well under it.
     expect(p.saved!.length).toBeLessThan(2_000_000);
+  });
+});
+
+describe("browser runtime", () => {
+  it("records the same local keyword discovery result as the server, with no network", async () => {
+    const rt = createBrowserRuntime({ persist: memoryPersist(), paceMs: 0 });
+    await rt.confirmRequirements();
+    const deadline = Date.now() + 10_000;
+    let run = await rt.getOrCreateCurrent();
+    while (run.phase !== "proposed" && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 10));
+      run = await rt.getOrCreateCurrent();
+    }
+    expect(run.phase).toBe("proposed");
+    expect(run.plans.find((x) => x.revision === run.currentPlanRevision)?.totals.totalCents).toBe(EXPECTED.clearedTotalCents);
+    const discovery = rt.listEvents().filter((ev) => ev.type === "model.call" && (ev.payload as { component?: unknown }).component === "discovery");
+    expect(discovery).toHaveLength(1);
+    expect(discovery[0]!.payload).toMatchObject({ engine: "local-keyword", provider: "local-keyword" });
+    rt.flush();
   });
 });
 

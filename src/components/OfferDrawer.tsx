@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import type { Offer, Run } from "@/lib/contracts";
-import { NODE_STATE_META, closestPackageFor, mealCoverage, type MarketNode } from "./derive";
+import { NODE_STATE_META, closestPackageFor, competitorSentence, mealCoverage, type MarketNode } from "./derive";
 import { GROUP_LABEL, LEVER_LABEL, MODE_LABEL, REJECT_LABEL, activePlan, clockTime, formatCents, formatLocal, planById } from "./format";
 import { Button, Chip, Glyph, KV, cx } from "./ui";
 
@@ -40,6 +40,7 @@ function Why({ run, node }: { run: Run; node: MarketNode }) {
   const plan = activePlan(run);
   const o = node.offer;
   const explanation = useMemo(() => (o && (node.state === "rejected" || node.state === "candidate") ? closestPackageFor(run, o) : null), [run, o, node.state]);
+  const lostTo = useMemo(() => (o && node.state === "rejected" ? competitorSentence(run, o, explanation) : null), [run, o, node.state, explanation]);
 
   if (node.state === "selected" && plan) {
     return (
@@ -107,6 +108,7 @@ function Why({ run, node }: { run: Run; node: MarketNode }) {
   const repair = Boolean(plan?.basedOnRevision);
   return (
     <div className="space-y-2 text-[13px] leading-snug">
+      {lostTo ? <p className="text-text">{lostTo}</p> : null}
       {explanation.rejects.length === 0 ? (
         <p className="text-text">
           Feasible in <span className="font-medium">{names}</span> ({formatCents(explanation.totalCents)}), but not chosen: the selected plan ranks first on {repair ? "fewest changes, then exposure" : "lowest all-in cost, then slack"}.
@@ -129,7 +131,7 @@ function Why({ run, node }: { run: Run; node: MarketNode }) {
         </>
       )}
       <p className="text-xs text-muted">
-        <span className="font-medium text-text">Browser re-check · server authoritative.</span> The solver&rsquo;s own rules, re-run against this snapshot over {explanation.candidatesTried} packages containing this offer.
+        Checked again in your browser against {explanation.candidatesTried} possible packages that include this supplier. The server&rsquo;s answer is the one that counts.
       </p>
     </div>
   );

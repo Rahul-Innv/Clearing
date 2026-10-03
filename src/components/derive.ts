@@ -8,7 +8,7 @@
 import type { CapabilityGroup, Offer, Plan, RejectCode, Run, RunEvent } from "@/lib/contracts";
 import { computeExposure } from "@/lib/ledger";
 import { deriveDemand, validateCandidate, type SolveContext } from "@/lib/solver";
-import { activePlan, GROUPS, offerCovers, PHASE_META, planById } from "./format";
+import { activePlan, formatCents, GROUPS, offerCovers, PHASE_META, planById } from "./format";
 
 export type NodeState =
   | "candidate"
@@ -309,4 +309,55 @@ export function closestPackageFor(run: Run, offer: Offer): PackageExplanation | 
     if (!best || cand.rejects.length < best.rejects.length || (cand.rejects.length === best.rejects.length && cand.totalCents < best.totalCents)) best = cand;
   }
   return best;
+}
+
+// ---------------------------------------------------------------------------
+// Who won this offer's slot?
+// ---------------------------------------------------------------------------
+
+export interface Competitor {
+  merchantName: string;
+  /** The winning selection's total as recorded in the plan. */
+  competitorCents: number;
+  /** This offer revision's total. */
+  offerCents: number;
+  /** offerCents − competitorCents; positive when this offer was dearer. */
+  diffCents: number;
+}
+
+/**
+ * The supplier holding this offer's role (its capability group: meals,
+ * drinks/consumables or courier) in the active plan. Null when there is no
+ * active plan, the offer's own supplier is selected, or the role is held by
+ * zero suppliers (e.g. no courier because the meal supplier delivers) or by
+ * more than one (supply assembly), where a one-to-one comparison would mislead.
+ */
+export function competitorFor(run: Run, offer: Offer): Competitor | null {
+  const plan = activePlan(run);
+  if (!plan) return null;
+  if (plan.selections.some((s) => s.merchantId === offer.merchantId)) return null;
+  const same = plan.selections.filter((s) => s.group === offer.group);
+  if (same.length !== 1) return null;
+  const w = same[0]!;
+  return { merchantName: w.merchantName, competitorCents: w.totalCents, offerCents: offer.totalCents, diffCents: offer.totalCents - w.totalCents };
+}
+
+/**
+ * One plain sentence naming the winner of this offer's slot. When this offer
+ * was not dearer, the sentence gives a reason only when the re-check shows
+ * one (every package with it fails a rule, or on a fresh plan its cheapest
+ * package costs more than the plan); otherwise null rather than a guess.
+ */
+export function competitorSentence(run: Run, offer: Offer, explanation: PackageExplanation | null): string | null {
+  const c = competitorFor(run, offer);
+  if (!c) return null;
+  const won = `${c.merchantName} won this slot at ${formatCents(c.competitorCents)}`;
+  if (c.diffCents > 0) return `${won}; this offer was ${formatCents(c.offerCents)} (${formatCents(c.diffCents)} more).`;
+  const price = c.diffCents === 0 ? `was also ${formatCents(c.offerCents)}` : `was ${formatCents(c.offerCents)} (${formatCents(-c.diffCents)} less)`;
+  if (explanation && explanation.rejects.length > 0) return `${won}. This offer ${price}, but every package re-checked with it fails a rule (below).`;
+  const plan = activePlan(run);
+  if (explanation && plan && !plan.basedOnRevision && explanation.totalCents > plan.totals.totalCents) {
+    return `${won}. This offer ${price}, but the cheapest package with it totals ${formatCents(explanation.totalCents)}, above the plan's ${formatCents(plan.totals.totalCents)}.`;
+  }
+  return null;
 }

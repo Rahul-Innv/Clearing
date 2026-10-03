@@ -145,11 +145,11 @@ function offersV1(stage: "collecting" | "cleared"): Offer[] {
 
 const NEGOTIATION_V1: NegotiationMessage[] = [
   { id: "neg_1", round: 1, offerId: "off_goldenhour_v1", merchantId: "m-goldenhour", lever: "earlier_slot", ask: "Ready 17:30 misses the courier pickup window; can it be earlier?", outcome: "revised", reply: "Moved to Ready 5:00 PM.", resultRevision: 2, reasoning: "local" },
-  { id: "neg_2", round: 1, offerId: "off_goldenhour_v1", merchantId: "m-goldenhour", lever: "volume_discount", ask: "Volume pricing for 60 units?", outcome: "revised", reply: "Applied a 5% volume discount for 60 units.", resultRevision: 3, reasoning: "local" },
-  { id: "neg_3", round: 1, offerId: "off_bodega_v1", merchantId: "m-bodega", lever: "volume_discount", ask: "Volume pricing for 180 units?", outcome: "declined", reply: "Fixed pricing; no volume discount available.", reasoning: "local" },
+  { id: "neg_2", round: 1, offerId: "off_goldenhour_v1", merchantId: "m-goldenhour", lever: "volume_discount", ask: "Volume pricing for 60 meals?", outcome: "revised", reply: "Applied a 5% volume discount for 60 units.", resultRevision: 3, reasoning: "local" },
+  { id: "neg_3", round: 1, offerId: "off_bodega_v1", merchantId: "m-bodega", lever: "volume_discount", ask: "Volume pricing for 60 drink servings?", outcome: "declined", reply: "Fixed pricing; no volume discount available.", reasoning: "local" },
   { id: "neg_4", round: 1, offerId: "off_fogline_v1", merchantId: "m-fogline", lever: "earlier_slot", ask: "Arrival 18:15 is after the latest arrival; please move earlier.", outcome: "revised", reply: "Moved to Arrive 4:30 PM.", resultRevision: 2, reasoning: "local" },
-  { id: "neg_5", round: 1, offerId: "off_fogline_v1", merchantId: "m-fogline", lever: "volume_discount", ask: "Volume pricing for 180 units?", outcome: "declined", reply: "Volume pricing starts at 80 units.", reasoning: "local" },
-  { id: "neg_6", round: 2, offerId: "off_juniper_v1", merchantId: "m-juniper", lever: "volume_discount", ask: "Volume pricing for 60 units?", outcome: "revised", reply: "Applied a 8% volume discount for 60 units.", resultRevision: 2, reasoning: "local" },
+  { id: "neg_5", round: 1, offerId: "off_fogline_v1", merchantId: "m-fogline", lever: "volume_discount", ask: "Volume pricing for 60 drink servings?", outcome: "declined", reply: "Volume pricing starts at 80 units; this order has 60.", reasoning: "local" },
+  { id: "neg_6", round: 2, offerId: "off_juniper_v1", merchantId: "m-juniper", lever: "volume_discount", ask: "Volume pricing for 60 meals?", outcome: "revised", reply: "Applied a 8% volume discount for 60 units.", resultRevision: 2, reasoning: "local" },
 ];
 
 // --- Requirements -------------------------------------------------------------

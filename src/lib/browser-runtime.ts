@@ -25,6 +25,7 @@ import {
   type Run,
   type RunEvent,
 } from "./contracts";
+import { localDiscovery } from "./discovery/local";
 import { systemClock } from "./fixtures";
 import { ensureJobRunning, startJobRunner } from "./jobs";
 import { localProvider } from "./providers/local";
@@ -131,6 +132,8 @@ export function createBrowserRuntime(opts: BrowserRuntimeOptions = {}): BrowserR
     clock: systemClock(),
     provider: localProvider(),
     catalog: CATALOG,
+    // The same deterministic keyword discovery the server uses without Moss: no network, no model.
+    discovery: localDiscovery(),
     paceMs,
     scheduleJob: (runId) => startJobRunner(service, runId),
   });

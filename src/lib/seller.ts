@@ -6,6 +6,7 @@
  */
 import type { Merchant, NegotiationLever, Offer, OfferLine } from "./contracts";
 import { discountedUnit, pctOf } from "./money";
+import { primaryQty } from "./offer-qty";
 import { addMinutes, toMinutes } from "./time";
 import type { Demand } from "./solver";
 
@@ -126,12 +127,6 @@ export function quote(m: Merchant, ctx: QuoteContext): QuoteResult {
 
 export type ConcessionResult = { outcome: "revised"; offer: Offer; reply: string } | { outcome: "declined"; reply: string };
 
-function primaryQty(o: Offer): number {
-  if (o.group === "meals") return o.lines.filter((l) => l.kind === "meal_vegetarian" || l.kind === "meal_standard").reduce((s, l) => s + l.qty, 0);
-  if (o.group === "drinks_consumables") return o.lines.filter((l) => l.kind === "drink_serving").reduce((s, l) => s + l.qty, 0);
-  return 1;
-}
-
 function appliedDiscountPct(m: Merchant, o: Offer): number {
   const first = o.lines[0];
   const item = first ? m.catalog.find((c) => c.sku === first.sku) : undefined;
@@ -174,7 +169,7 @@ export function respond(m: Merchant, current: Offer, lever: NegotiationLever, ro
     const tier = [...m.policy.volumeDiscount].sort((a, b) => b.pct - a.pct).find((t) => q >= t.minQty);
     if (!tier) {
       const lowest = [...m.policy.volumeDiscount].sort((a, b) => a.minQty - b.minQty)[0];
-      return { outcome: "declined", reply: lowest ? `Volume pricing starts at ${lowest.minQty} units.` : "Fixed pricing; no volume discount available." };
+      return { outcome: "declined", reply: lowest ? `Volume pricing starts at ${lowest.minQty} units; this order has ${q}.` : "Fixed pricing; no volume discount available." };
     }
     const lines = priceLines(m, qtyByKind, tier.pct);
     if (typeof lines === "string") return { outcome: "declined", reply: lines };
