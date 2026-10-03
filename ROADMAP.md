@@ -17,13 +17,14 @@ next, and what this build will never claim. Everything here matches the honesty 
   Postgres store.
 - **No organizer login.** Runs are per device in browser mode and per SQLite file in server
   mode.
-- **Integrations are wired but unverified live.** Anthropic live reasoning, Novita, ZooWork, BAND,
-  Moss, and Tavily each have an adapter with offline tests and sit behind env flags. Each is
-  reported as "not connected" until a real successful call is recorded as an event.
+- **Integrations.** On the demo machine (server mode) reasoning runs on ZooWork Managed Agents
+  and supplier web discovery on Tavily; the app's Integrations panel reports "live-verified" only
+  after a real successful call is recorded as an event, and the hosted browser demo always runs
+  local rules. BAND, Moss, and Novita are implemented and offline-tested but not configured.
 
 ## Near-term
-- Live-verify each integration with a real credential and record the successful call as an
-  event, starting with `npx tsx scripts/zoowork-verify.mts` for ZooWork.
+- Configure and live-verify BAND, Moss, and Novita the same way ZooWork and Tavily are run on the
+  demo machine, with the successful call recorded as an event.
 - Console fixes observed in an organizer walkthrough: the "Supplier cancels" dropdown
   preselects a live supplier once a plan is approved (one stray click cancels the wrong one),
   and the discovered-suppliers panel promises "Runs at market open" before clearing but then

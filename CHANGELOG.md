@@ -21,9 +21,9 @@ All notable changes to this project are documented here. The format is based on
   such as Vercel: the market simulation runs on-device and state lives in `localStorage`.
 - Optional serverless store on Supabase Postgres (`CLEARING_STORE` + `SUPABASE_DB_URL`);
   SQLite via `node:sqlite` otherwise.
-- Env-flagged integrations (Anthropic live reasoning, Novita, ZooWork, BAND, Moss, Tavily),
-  reported
-  as "not connected" or unverified until a real successful call is recorded as an event.
+- Env-flagged integrations: ZooWork reasoning and Tavily web discovery configured on the demo
+  machine; Anthropic live mode, Novita, BAND and Moss implemented but not configured. Each is
+  reported as "not connected" or unverified until a real successful call is recorded as an event.
 - Novita AI reasoning transport (`CLEARING_REASONING=novita`, OpenAI-compatible Chat Completions),
   offline-tested and shown as unverified until a schema-valid reply is recorded.
 - Simple view readable for anyone, with a desktop layout.
@@ -34,5 +34,8 @@ All notable changes to this project are documented here. The format is based on
   pointers, and a corrected test count (347 across 19 files).
 - ROADMAP.md stating the deliberate current scope, near-term work, and non-goals; SUBMISSION.md
   test count corrected and the team and video placeholders filled.
+
+- Dockerfile and Render blueprint for the hosted server mode; a `/market` page with the market
+  graph; Simple view cards, stat tiles and plan rows.
 
 [Unreleased]: https://github.com/Rahul-Innv/Clearing/commits/main
