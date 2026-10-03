@@ -44,7 +44,7 @@ the simulated event clock starts at 2:00 PM on that date (America/Los_Angeles, e
 
 | Axis | This build | How to change |
 |---|---|---|
-| Reasoning | **Local rules** (deterministic request interpretation and negotiation) | Two live options replace exactly two components (request interpretation and counteroffer lever choice): `CLEARING_REASONING=live` with `ANTHROPIC_API_KEY`, or `CLEARING_REASONING=zoowork` with `ZOOWORK_API_KEY`, which runs the planner/buyer role on a ZooWork Managed Agent (created once as `clearing-planner`, reused across restarts). Both are implemented and offline-tested but **unverified live** here because no key was available; failures fall back to local rules and are recorded as `model.fallback` events. Verify ZooWork with `npx tsx scripts/zoowork-verify.mts`. |
+| Reasoning | **Local rules** (deterministic request interpretation and negotiation) | Live options replace exactly two components (request interpretation and counteroffer lever choice): `CLEARING_REASONING=live` with `ANTHROPIC_API_KEY`, or `CLEARING_REASONING=zoowork` with `ZOOWORK_API_KEY`, which runs the planner/buyer role on a ZooWork Managed Agent (created once as `clearing-planner`, reused across restarts). Both are implemented and offline-tested but **unverified live** here because no key was available; failures fall back to local rules and are recorded as `model.fallback` events. Verify ZooWork with `npx tsx scripts/zoowork-verify.mts`. A third option, `CLEARING_REASONING=novita` with `NOVITA_API_KEY`, sends the same two calls to Novita's OpenAI-compatible Chat Completions API (default model `meta-llama/llama-3.3-70b-instruct`, override with `NOVITA_MODEL`); it is offline-tested only, and the status panel reads "unverified until first successful call" until a schema-valid reply is recorded in the running process. |
 | Supply | **Fictional demo catalog** (`src/lib/catalog.ts`) | Moss indexes a fictional supplier directory and Tavily can append web results; both appear only as unverified candidates (`MOSS_PROJECT_ID`/`MOSS_PROJECT_KEY`, `TAVILY_API_KEY`). |
 | Coordination | **Local transport** (in-process pipeline, SSE to the browser) | BAND coordination mode is implemented and offline-tested but **unverified live** (no BAND credentials here): see [BAND coordination mode](#band-coordination-mode). |
 | Execution | **Simulated orders**, simulated charges and refunds | Not changeable in this build. |
@@ -122,7 +122,7 @@ from the same repository, so the policy boundary is the process and the room, no
 
 Copy `.env.example` to `.env.local`. Variables: `CLEARING_REASONING`, `ANTHROPIC_API_KEY`,
 `CLEARING_MODEL`, `CLEARING_MAX_MODEL_CALLS`, `CLEARING_MAX_CONCURRENT_MODEL_CALLS`,
-`CLEARING_MODEL_TIMEOUT_MS`, `ZOOWORK_API_KEY`, `ZOOWORK_BASE_URL`, `ZOOWORK_AGENT_ID`, `CLEARING_PACE_MS` (readability pacing between real supplier
+`CLEARING_MODEL_TIMEOUT_MS`, `ZOOWORK_API_KEY`, `ZOOWORK_BASE_URL`, `ZOOWORK_AGENT_ID`, `NOVITA_API_KEY`, `NOVITA_MODEL`, `NOVITA_BASE_URL`, `CLEARING_PACE_MS` (readability pacing between real supplier
 events; 0 in tests), `CLEARING_DB_PATH`, `CLEARING_AGENT_CAN_APPROVE`, and placeholders for
 `TAVILY_API_KEY`, `MOSS_PROJECT_ID`, `MOSS_PROJECT_KEY`, `ZOOWORK_API_KEY`, and the BAND set
 (`BAND_BUYER_AGENT_ID`, `BAND_BUYER_API_KEY`, `BAND_SELLER_AGENTS`, `BAND_ROOM_ID`,

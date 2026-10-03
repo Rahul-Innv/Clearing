@@ -52,6 +52,7 @@ export function browserIntegrationStatus(): IntegrationStatus {
     execution: "Simulated orders",
     tavily: { connected: false, note: "Not connected — browser runtime (no server, no credentials)" },
     zoowork: { connected: false, note: "Not connected — browser runtime (no server, no credentials)" },
+    novita: { connected: false, note: "Not connected — browser runtime (no server, no credentials)" },
     band: { connected: false, note: "Not connected — browser runtime (no server, no credentials)" },
     paceMs: BROWSER_PACE_MS,
   };
