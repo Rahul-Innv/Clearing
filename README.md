@@ -2,6 +2,9 @@
 
 **Your event. Supplied. Even when plans change.**
 
+**Live demo:** https://clearing-pied.vercel.app (browser-runtime mode: organizer console, no sign-in, per-device state).
+**Code:** https://github.com/Rahul-Innv/Clearing · **Submission notes:** [SUBMISSION.md](SUBMISSION.md) · **Demo script:** [DEMO_SCRIPT.md](DEMO_SCRIPT.md)
+
 Clearing is an AI organizer with a marketplace behind it. Describe what an already-booked
 gathering needs; fictional demo suppliers compete with structured offers; a deterministic
 clearing engine combines them into one feasible, fully priced package; when a supplier
