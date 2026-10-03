@@ -73,7 +73,7 @@ Setup for each is documented. ZooWork, BAND, Moss and Tavily are wired into the 
 npm install                     # Node >= 22.13, no credentials
 npm run dev                     # http://localhost:3100
 npm run typecheck && npm run lint
-npm test                        # 269 unit tests, 11 files
+npm test                        # 347 unit tests, 19 files
 npm run build && npm start
 npm run test:e2e                # Playwright: 13 passed, 1 skipped by project filter
 ```
@@ -82,7 +82,7 @@ Counts are as recorded in BUILD_PLAN §5; re-run before presenting. Do not run `
 
 ## 8. Team and links
 
-- Team: [name]
+- Team: Clearing
 - Repo: https://github.com/Rahul-Innv/Clearing (branch main)
 - Hosted demo (browser runtime, organizer console): https://clearing-pied.vercel.app
-- Demo video: [link]
+- Demo video: none; the hosted demo and DEMO_SCRIPT.md stand in

@@ -2,6 +2,10 @@
 
 **Your event. Supplied. Even when plans change.**
 
+[![CI](https://github.com/Rahul-Innv/Clearing/actions/workflows/ci.yml/badge.svg)](https://github.com/Rahul-Innv/Clearing/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node ≥ 22.13](https://img.shields.io/badge/node-%E2%89%A5%2022.13-brightgreen.svg)](package.json)
+
 **Live demo:** https://clearing-pied.vercel.app (browser-runtime mode: organizer console, no sign-in, per-device state).
 **Code:** https://github.com/Rahul-Innv/Clearing · **Submission notes:** [SUBMISSION.md](SUBMISSION.md) · **Demo script:** [DEMO_SCRIPT.md](DEMO_SCRIPT.md)
 
@@ -14,6 +18,26 @@ for fresh approval. Built for small hackathons, meetups, and team gatherings.
 > Every run is labelled **Demo suppliers · Local rules · Simulated orders**. "Market
 > cleared" means a feasible proposed solution exists for the modelled requirements. No
 > real reservation, purchase, or delivery ever happens in this build.
+
+## How it works
+
+```mermaid
+flowchart LR
+  B["Organizer brief"] --> R["Requirements<br/>local rules or live model"]
+  R --> M["Market opens<br/>demo suppliers quote"]
+  M --> N["Two bounded negotiation rounds<br/>real terms change"]
+  N --> S{"Deterministic solver<br/>owns totals and feasibility"}
+  S -- feasible --> P["MARKET CLEARED<br/>one priced package"]
+  S -- no fit --> G["NO FEASIBLE PLAN<br/>exact gap shown"]
+  P --> A["Organizer approves<br/>simulated orders"]
+  A --> D["Disruption: cancel, delay,<br/>headcount change"]
+  D --> X["Repair: fewest changes,<br/>then exposure, then slack"]
+  X --> S
+```
+
+The language model, when enabled, only extracts requirements and suggests counteroffers. Every
+total, feasibility check, ID, revision, and event sequence number is owned by the solver and the
+service layer, never by a model.
 
 ## Run it locally
 
@@ -133,7 +157,7 @@ events; 0 in tests), `CLEARING_DB_PATH`, `CLEARING_AGENT_CAN_APPROVE`, and place
 ```bash
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint (flat config from eslint-config-next)
-npm test            # vitest: 269 unit tests across 11 files
+npm test            # vitest: 347 unit tests across 19 files
 npm run build       # next build
 npm run test:e2e    # playwright: full journey + edges, desktop and mobile, against `next start` on :3100
 npx tsx scripts/simulate.ts   # design-time diagnostic: pure modules through the flagship scenario
@@ -318,3 +342,13 @@ src/app/api/           REST + SSE route handlers
 src/components/        operations console
 docs/HLD.md, docs/LLD.md, BUILD_PLAN.md, DEMO_SCRIPT.md
 ```
+
+## Contributing and security
+
+Contributions are welcome; read [CONTRIBUTING.md](CONTRIBUTING.md) first, because the honesty
+rules there are non-negotiable. Report vulnerabilities privately per [SECURITY.md](SECURITY.md).
+Community standards are in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md); notable changes are tracked
+in [CHANGELOG.md](CHANGELOG.md); scope and next steps are in [ROADMAP.md](ROADMAP.md). MIT licensed; see
+[LICENSE](LICENSE).
+
+Built by Rahul Krishna.
