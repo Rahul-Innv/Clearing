@@ -3,8 +3,9 @@
  * cached on globalThis), one service, one background job runner registry.
  *
  * Environment: CLEARING_DB_PATH (default .data/clearing.sqlite),
- * CLEARING_PACE_MS (default 350), CLEARING_REASONING + ANTHROPIC_API_KEY for
- * the feature-flagged live provider (local rules otherwise), MOSS_PROJECT_ID +
+ * CLEARING_PACE_MS (default 350), CLEARING_REASONING + ANTHROPIC_API_KEY,
+ * ZOOWORK_API_KEY or NOVITA_API_KEY for the feature-flagged live provider
+ * (local rules otherwise), MOSS_PROJECT_ID +
  * MOSS_PROJECT_KEY for Moss supplier discovery (local keyword matcher otherwise),
  * BAND_BUYER_AGENT_ID + BAND_BUYER_API_KEY + BAND_SELLER_AGENTS for BAND-room coordination.
  */
@@ -18,7 +19,8 @@ import { tavilyWebDiscovery, withWebDiscovery } from "./discovery/tavily";
 import type { DiscoveryProvider } from "./discovery/types";
 import { systemClock } from "./fixtures";
 import { ensureJobRunning, startJobRunner } from "./jobs";
-import { liveProvider, liveProviderFromEnv } from "./providers/live";
+import { liveProvider, liveProviderFromEnv, type LiveTransport } from "./providers/live";
+import { novitaTransportFromEnv } from "./providers/novita";
 import { zooworkTransportFromEnv } from "./providers/zoowork";
 import { localProvider } from "./providers/local";
 import { integrationStatus } from "./providers/status";
@@ -30,18 +32,23 @@ import type { HydrateOptions, SqlLike, SupabaseStore } from "./store-supabase";
 
 export { isServerless };
 
+/** Same call ceiling, concurrency cap and timeout env vars for every non-Anthropic transport. */
+function boundedLive(transport: LiveTransport, timeoutMs: number): ReasoningProvider {
+  return liveProvider({
+    transport,
+    maxCalls: Number(process.env.CLEARING_MAX_MODEL_CALLS ?? 16) || 16,
+    maxConcurrent: Number(process.env.CLEARING_MAX_CONCURRENT_MODEL_CALLS ?? 4) || 4,
+    timeoutMs,
+  });
+}
+
 async function appProvider(): Promise<ReasoningProvider> {
   try {
     const zoowork = await zooworkTransportFromEnv(process.env);
-    if (zoowork) {
-      const timeoutMs = Number(process.env.CLEARING_MODEL_TIMEOUT_MS ?? 60_000) || 60_000;
-      return liveProvider({
-        transport: zoowork,
-        maxCalls: Number(process.env.CLEARING_MAX_MODEL_CALLS ?? 16) || 16,
-        maxConcurrent: Number(process.env.CLEARING_MAX_CONCURRENT_MODEL_CALLS ?? 4) || 4,
-        timeoutMs,
-      });
-    }
+    if (zoowork) return boundedLive(zoowork, Number(process.env.CLEARING_MODEL_TIMEOUT_MS ?? 60_000) || 60_000);
+    const novitaTimeoutMs = Number(process.env.CLEARING_MODEL_TIMEOUT_MS ?? 30_000) || 30_000;
+    const novita = novitaTransportFromEnv(process.env, { timeoutMs: novitaTimeoutMs });
+    if (novita) return boundedLive(novita, novitaTimeoutMs);
     return (await liveProviderFromEnv(process.env)) ?? localProvider();
   } catch (err) {
     console.error("[clearing] live provider unavailable; using local rules:", err instanceof Error ? err.message : String(err));

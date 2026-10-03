@@ -1,6 +1,7 @@
 import type { IntegrationStatus } from "../contracts";
 import { MOSS_INDEX_NAME, mossProcessStatus } from "../discovery/types";
 import { bandConfigured, bandLiveVerified } from "../coordination/band-state";
+import { novitaLiveVerified, novitaModel } from "./novita";
 import { zooworkLiveVerified } from "./zoowork";
 
 /** Presence-only credential checks. Values are never read into logs or responses. */
@@ -8,12 +9,16 @@ export function integrationStatus(env: NodeJS.ProcessEnv = process.env): Integra
   const live = env.CLEARING_REASONING === "live" && Boolean(env.ANTHROPIC_API_KEY);
   const zoowork = env.CLEARING_REASONING === "zoowork" && Boolean(env.ZOOWORK_API_KEY);
   const zwVerified = zooworkLiveVerified();
+  const novita = env.CLEARING_REASONING === "novita" && Boolean(env.NOVITA_API_KEY);
+  const nvVerified = novita ? novitaLiveVerified() : null;
   const band = bandConfigured(env);
   const bandLive = band ? bandLiveVerified() : null;
   return {
     reasoning: zoowork
       ? { mode: "live", provider: zwVerified ? `ZooWork Managed Agents · ${zwVerified.model} (live-verified this process)` : "ZooWork Managed Agents · planner role (unverified until first successful call)", verified: Boolean(zwVerified) }
-      : live
+      : novita
+        ? { mode: "live", provider: `Novita · ${novitaModel(env)} (${nvVerified ? "live-verified this process" : "unverified until first successful call"})`.slice(0, 200), verified: Boolean(nvVerified) }
+        : live
         ? { mode: "live", provider: `Anthropic · ${env.CLEARING_MODEL ?? "claude-opus-5-5"} (unverified until first successful call)`, verified: false }
         : { mode: "local", provider: "Local rules", verified: true },
     supply: "Fictional demo catalog",
@@ -23,6 +28,9 @@ export function integrationStatus(env: NodeJS.ProcessEnv = process.env): Integra
     zoowork: zoowork
       ? { connected: Boolean(zwVerified), note: zwVerified ? `Planner/buyer role runs on ZooWork Agent ${zwVerified.agentId} (${zwVerified.model}); replies enter the pipeline after schema validation` : "Configured: planner/buyer role on ZooWork Managed Agents; unverified until a successful call is recorded" }
       : { connected: false, note: "Not connected — set CLEARING_REASONING=zoowork and ZOOWORK_API_KEY (funded ZooWork project, Developer Preview)" },
+    novita: novita
+      ? { connected: Boolean(nvVerified), note: nvVerified ? `Request interpretation and lever choice ran on Novita (${nvVerified.model}) in this process; replies enter the pipeline after schema validation`.slice(0, 200) : "Configured: reasoning on Novita's OpenAI-compatible API; unverified until a successful call is recorded" }
+      : { connected: false, note: "Not connected — set CLEARING_REASONING=novita and NOVITA_API_KEY" },
     band: bandLive
       ? { connected: true, note: `Live-verified: room ${bandLive.roomId}, ${bandLive.roundTrips} round trips`.slice(0, 200) }
       : band

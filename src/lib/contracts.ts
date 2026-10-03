@@ -525,6 +525,8 @@ export const IntegrationStatus = z.object({
   execution: z.literal("Simulated orders"),
   tavily: z.object({ connected: z.boolean(), note: ShortText }),
   zoowork: z.object({ connected: z.boolean(), note: ShortText }),
+  /** Novita OpenAI-compatible reasoning; connected only after a schema-valid reply in this process. Optional so status payloads from builds without it still parse. */
+  novita: z.object({ connected: z.boolean(), note: ShortText }).optional(),
   band: z.object({ connected: z.boolean(), note: ShortText }),
   paceMs: z.number().int().min(0),
 });
