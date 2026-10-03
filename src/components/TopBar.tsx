@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { IntegrationStatus, Phase } from "@/lib/contracts";
 import type { ClientRuntimeMode, Connection } from "@/hooks/useRunStream";
@@ -179,6 +180,15 @@ export function TopBar({
           <Button variant="secondary" size="sm" onClick={onToggleView} aria-pressed={view === "full"}>
             {view === "simple" ? "Show details" : "Simple view"}
           </Button>
+        ) : null}
+        {view ? (
+          <Link
+            href="/market"
+            title="Open the market map on its own page"
+            className="inline-flex h-7 shrink-0 items-center justify-center rounded-md border border-line bg-surface-2/70 px-2.5 text-xs font-medium text-text transition-colors hover:border-muted/40 hover:bg-surface-2"
+          >
+            Map
+          </Link>
         ) : null}
         {simple ? null : (
           <>

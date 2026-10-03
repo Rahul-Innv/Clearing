@@ -16,6 +16,6 @@ delete rest.webServer;
 
 export default defineConfig({
   ...rest,
-  testMatch: /(browser-runtime|simple)\.spec\.ts/,
+  testMatch: /(browser-runtime|simple|market)\.spec\.ts/,
   projects: (base.projects ?? []).filter((p) => p.name === "desktop"),
 });
