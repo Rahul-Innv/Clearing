@@ -26,7 +26,9 @@ A market mechanism, not a chatbot: **request, competing offers, bounded negotiat
 
 ## 4. Live demo for judges (90 seconds)
 
-Setup: `npm run build && npm start`, open http://localhost:3100, press **Reset**.
+Setup: open the hosted browser-runtime build at https://clearing-pied.vercel.app and press **Reset**
+(organizer console only; per-device state). For the agent front door and attendee links run the
+server mode locally: `npm run build && npm start`, open http://localhost:3100, press **Reset**.
 
 1. **(0:00)** Preset: dinner for 60, at least 20 vegetarian, drinks, plates, utensils, ready by 6:30 PM, max $1,000. Click **Confirm requirements**.
 2. **(0:10)** Suppliers quote; Harbor Kitchen declines (minimum 75). Round 0 has no feasible plan; rounds 1 and 2 change real terms.
@@ -55,7 +57,7 @@ The numbers are computed by the solver, not scripted.
 | Moss | supplier discovery over a fictional directory via Moss hybrid search; results are unverified candidates, never offers; offline-tested; **not live-verified** (needs MOSS_PROJECT_ID/KEY) |
 | Tavily | web discovery appended as unverified candidates with source URL and retrieval time; offline-tested; **not live-verified** (needs TAVILY_API_KEY) |
 
-Setup for each is documented. ZooWork, BAND, Moss and Tavily are wired into the real pipeline behind the same validation as every other external source, and each is claimed only to the extent a live-verified run exists at submission time. Entire is configured at the repo level (`.entire/settings.json`) and must be enabled from a developer machine. Other limits: no organizer login, one long-lived Node process, no public deployment.
+Setup for each is documented. ZooWork, BAND, Moss and Tavily are wired into the real pipeline behind the same validation as every other external source, and each is claimed only to the extent a live-verified run exists at submission time. Entire is configured at the repo level (`.entire/settings.json`) and must be enabled from a developer machine. Other limits: no organizer login; the public deployment is the browser-runtime demo mode (console only, no agent API or attendee links), and the full server mode needs one long-lived Node process or the Supabase mode.
 
 ## 6. Judging criteria
 
@@ -82,4 +84,5 @@ Counts are as recorded in BUILD_PLAN §5; re-run before presenting. Do not run `
 
 - Team: [name]
 - Repo: https://github.com/Rahul-Innv/Clearing (branch main)
+- Hosted demo (browser runtime, organizer console): https://clearing-pied.vercel.app
 - Demo video: [link]

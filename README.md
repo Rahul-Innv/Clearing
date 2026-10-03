@@ -226,8 +226,9 @@ curl -s -X POST $BASE/api/agent/approve -H 'content-type: application/json' \
 ## Deployment limitations
 
 Clearing is designed for one long-lived Node process: background pipeline steps run
-in-process and state is a local SQLite file. A serverless host would lose both. There is no
-public deployment, no paid provisioning, and no real-world fulfillment.
+in-process and state is a local SQLite file. A serverless host would lose both, so the public
+deployment at https://clearing-pied.vercel.app runs the browser runtime described below (organizer
+console only). There is no paid provisioning and no real-world fulfillment.
 
 ## Deploy to Vercel
 
