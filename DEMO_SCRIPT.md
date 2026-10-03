@@ -67,5 +67,5 @@ preset is fresh. The badge reads *Demo suppliers · Local rules · Simulated ord
 - The numbers are computed by the solver from the catalog, not scripted; editing the request changes them.
 - "Optimal" is only among the candidates actually evaluated (41 for the 6 offers quoted
   at 60 attendees).
-- Live-model mode exists but is unverified here; ZooWork, BAND and Tavily are not connected.
+- On the demo laptop the reasoning runs on ZooWork and web discovery on Tavily (server mode, keys in `.env.local`); the Integrations panel shows their live status, and the hosted browser demo runs local rules. BAND, Moss and Novita are implemented but not configured.
 - An external agent can submit and read via `/agent` and `/api/agent`, but cannot approve.

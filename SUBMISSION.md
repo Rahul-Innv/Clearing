@@ -45,19 +45,19 @@ The numbers are computed by the solver, not scripted.
 
 **Simulated:** every supplier is fictional (demo catalog); orders, charges and refunds are simulated. MARKET CLEARED means a feasible proposed solution for the modelled requirements, never a reservation, purchase or delivery. Seller "agents" are deterministic policy functions; a real supplier-side surface is the next step.
 
-**Reasoning:** local rules by default. The live-model adapter (request interpretation and counteroffer lever choice only) is implemented and unit-tested with a fake transport, but **unverified live** because no key was available.
+**Reasoning:** local rules by default. The live-model adapter (request interpretation and counteroffer lever choice only) is implemented and unit-tested with a fake transport. For the demo it runs on **ZooWork Managed Agents** (`CLEARING_REASONING=zoowork`, key configured on the team's demo machine); the app's Integrations panel reports "live-verified" only after a real successful call is recorded as an event, and that panel is the evidence. The hosted browser demo always runs local rules.
 
 **Integrations, exactly as BUILD_PLAN §2 states:**
 
 | Integration | Status |
 |---|---|
-| Live model (Anthropic) | not connected; adapter unverified live |
-| ZooWork | adapter implemented: the planner/buyer role runs on a ZooWork Managed Agent (SDK 0.10.2), offline-tested; **not live-verified** in the build environment (no key). With `CLEARING_REASONING=zoowork` and `ZOOWORK_API_KEY`, `npx tsx scripts/zoowork-verify.mts` proves it in one call |
+| Live model (Anthropic) | not used for the demo; adapter offline-tested only |
+| ZooWork | **configured for the demo** (`CLEARING_REASONING=zoowork` + `ZOOWORK_API_KEY` on the demo machine): the planner/buyer role runs on a ZooWork Managed Agent (SDK 0.10.2). Offline-tested in CI; the live status is shown in the app (Integrations panel, "live-verified this process" after the first successful call) and by `npx tsx scripts/zoowork-verify.mts`. Not verified in the build environment, which had no network access to ZooWork |
 | BAND | adapter implemented: buyer agent posts asks into a BAND room, seller agents answer by @mention as separate processes, replies are re-priced against policy before use; offline-tested (16 tests); **not live-verified** (needs registered BAND agents) |
 | Moss | supplier discovery over a fictional directory via Moss hybrid search; results are unverified candidates, never offers; offline-tested; **not live-verified** (needs MOSS_PROJECT_ID/KEY) |
-| Tavily | web discovery appended as unverified candidates with source URL and retrieval time; offline-tested; **not live-verified** (needs TAVILY_API_KEY) |
+| Tavily | **configured for the demo** (`TAVILY_API_KEY` on the demo machine): web discovery appended to the Discovered suppliers panel as unverified candidates with source URL and retrieval time, never as offers. Offline-tested in CI; the live result is visible in the panel and recorded as a discovery event. Not verified in the build environment |
 
-Setup for each is documented. ZooWork, BAND, Moss and Tavily are wired into the real pipeline behind the same validation as every other external source, and each is claimed only to the extent a live-verified run exists at submission time. Entire is configured at the repo level (`.entire/settings.json`) and must be enabled from a developer machine. Other limits: no organizer login; the public deployment is the browser-runtime demo mode (console only, no agent API or attendee links), and the full server mode needs one long-lived Node process or the Supabase mode.
+Setup for each is documented. ZooWork, BAND, Moss, Tavily and Novita are wired into the real pipeline behind the same validation as every other external source. ZooWork and Tavily are configured on the demo machine; BAND, Moss and Novita are implemented but not configured. Each is claimed only to the extent the running app records a successful call. Entire is configured at the repo level (`.entire/settings.json`) and must be enabled from a developer machine. Other limits: no organizer login; the public deployment is the browser-runtime demo mode (console only, no agent API or attendee links), and the full server mode needs one long-lived Node process or the Supabase mode.
 
 ## 6. Judging criteria
 
