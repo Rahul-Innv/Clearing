@@ -80,7 +80,7 @@ test("simple view: find, approve, supplier cancels, fixed plan, approve, show de
   await page.getByRole("button", { name: "Find me a plan" }).click();
   await expect(page.getByText("Total $784.40")).toBeVisible({ timeout: 45_000 });
   await expect(page.getByText("Money left $215.60")).toBeVisible();
-  await expect(page.getByText("Food · Golden Hour Taqueria · 60 meals (20 vegetarian) · picked up at 5:00 PM · $565.40")).toBeVisible();
+  await expect(page.getByText("Food · Golden Hour Taqueria · 60 meals (20 vegetarian) · picked up by Pelican Couriers at 5:00 PM · $565.40")).toBeVisible();
   await expect(page.getByText("Drinks and plates · Bodega Marquez · $147.00")).toBeVisible();
   await expect(page.getByText("Delivery · Pelican Couriers · at your hall by 5:50 PM · $72.00")).toBeVisible();
   await expect(page.getByText("This is a practice run. Nothing is really ordered.")).toBeVisible();
@@ -103,7 +103,7 @@ test("simple view: find, approve, supplier cancels, fixed plan, approve, show de
   await expect(page.getByText("Total $994.14")).toBeVisible();
   await expect(page.getByText("Food now comes from Juniper & Rye Catering instead of Golden Hour Taqueria.")).toBeVisible();
   // The kept-but-swapped courier carries the reason the run itself derived (the full view's "Widened repair" note).
-  await expect(page.getByText("Delivery now comes from Swiftline Runners instead of Pelican Couriers, to stay within the budget.")).toBeVisible();
+  await expect(page.getByText("Delivery now comes from Swiftline Runners instead of Pelican Couriers, to stay under $1,000.00.")).toBeVisible();
   await expect(page.getByText("You would get $565.40 back from Golden Hour Taqueria.")).toBeVisible();
   await expect(simplePhase(page, "needs_approval")).toBeVisible();
   await chromeVisible(page);

@@ -6,28 +6,61 @@
  * budget, offer times); every button calls a command the full console also uses.
  * Nothing here decides feasibility, totals, IDs or authority.
  */
+import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
 import type { DisruptionInput, Plan, PlanSelection, RequestInput, Run } from "@/lib/contracts";
 import type { ApprovalGate } from "./derive";
 import { PRESET_TEXT, SIMPLE_PRESET_TEXT } from "@/lib/fixtures";
 import { PHASE_META, activePlan, formatCents, formatLocal } from "./format";
-import { cx } from "./ui";
+import { IconCircle, Meter, cx } from "./ui";
 
 /*
- * Visual language (Refero references: Aesop dark cart, Square receipt, Apple Invites welcome,
- * Kinhive onboarding): one near-black canvas, raised cards with a hairline border and a faint
- * top highlight, a small uppercase eyebrow over each heading, and mint as the single accent.
+ * Visual language (Refero references, Monarch Money web app: Transactions list 0c65d6c2, Add transaction
+ * form 1cb4608a, Assign accounts goal progress 82d63b0e, Dashboard cards 7c28401a), translated to the
+ * app's dark tokens: cards one step above the canvas with a soft hairline and a title row, 12px form
+ * fields with the label above, stat tiles with a label over a big number, a thin budget bar,
+ * transaction rows (icon circle, name, muted detail, right-aligned amount), and one solid primary button.
+ * Mint stays the single accent.
  */
 const BIG_BUTTON =
-  "inline-flex h-[52px] min-h-12 items-center justify-center gap-2 rounded-xl px-7 text-[16px] font-semibold tracking-[-0.01em] transition-[filter,background-color,border-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed";
+  "inline-flex h-12 min-h-12 items-center justify-center gap-2 rounded-[10px] px-6 text-[16px] font-semibold tracking-[-0.005em] transition-[filter,background-color,border-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/60 focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed";
 const PRIMARY =
-  "border border-mint bg-mint text-ink shadow-[0_1px_2px_rgba(0,0,0,0.3),0_8px_24px_rgba(94,234,212,0.18)] hover:brightness-[1.04] disabled:border-white/[0.08] disabled:bg-surface-2 disabled:text-muted disabled:shadow-none disabled:hover:brightness-100";
+  "border border-mint bg-mint text-ink hover:brightness-110 disabled:border-hairline disabled:bg-card-2 disabled:text-muted disabled:hover:brightness-100";
 const SECONDARY =
-  "border border-white/[0.08] bg-surface-2 text-text hover:border-white/[0.16] hover:bg-[#1f2024] disabled:text-muted/80 disabled:hover:border-white/[0.08] disabled:hover:bg-surface-2";
+  "border border-hairline bg-white/[0.06] text-text hover:bg-white/[0.10] disabled:text-muted/80 disabled:hover:bg-white/[0.06]";
 const FIELD =
-  "w-full rounded-xl border border-white/[0.10] bg-ink/70 px-3.5 py-3.5 text-[17px] leading-snug text-text placeholder:text-muted/80 transition-[border-color,box-shadow] duration-150 hover:border-white/[0.18] focus-visible:border-mint/60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-mint/30 disabled:opacity-60";
-const LABEL = "mb-2 block text-[13px] font-medium tracking-[0.005em] text-muted";
-const EYEBROW = "text-[12px] font-medium uppercase tracking-[0.08em] text-muted";
+  "w-full rounded-field border border-white/[0.09] bg-field px-3.5 py-3 text-[16px] leading-snug text-text placeholder:text-muted/70 transition-[border-color,box-shadow] duration-150 hover:border-white/[0.16] focus-visible:border-mint/60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-mint/25 disabled:opacity-60";
+const LABEL = "mb-1.5 block text-[14px] font-medium text-text";
+const HINT = "mt-1.5 text-[13px] leading-snug text-muted";
+const TILE =
+  "flex w-full items-center gap-3.5 rounded-2xl border border-hairline bg-card-2 p-4 text-left text-[16px] font-medium leading-snug text-text transition-[background-color,border-color] duration-150 sm:flex-col sm:items-start sm:justify-between sm:gap-6";
+
+/** Simple 18px line icons, drawn inline (no icon font, no network). */
+const ICON_PATHS = {
+  food: "M6 3v6a2 2 0 0 0 4 0V3M8 3v18M17 21V3c-2 1.4-3 3.9-3 7v4h3",
+  cup: "M5 8h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V8zM16 9.5h1.5a2.5 2.5 0 0 1 0 5H16M5 21h11",
+  truck: "M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3.5v2.5h-7M7 19.3a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6zM17 19.3a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6z",
+  cancel: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9 9l6 6M15 9l-6 6",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
+  people: "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.3a3 3 0 0 1 0 5.4M17.5 14.3c2 .8 3.5 3 3.5 5.7",
+  swap: "M4 8h14l-3.5-3.5M20 16H6l3.5 3.5",
+  refund: "M9 14l-4-4 4-4M5 10h9.5a4.5 4.5 0 0 1 0 9H12",
+  arrow: "M5 12h14M13 6l6 6-6 6",
+} as const;
+
+function Icon({ name, size = 18 }: { name: keyof typeof ICON_PATHS; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <path d={ICON_PATHS[name]} />
+    </svg>
+  );
+}
+
+const ROLE_ICON: Record<PlanSelection["group"], keyof typeof ICON_PATHS> = {
+  meals: "food",
+  drinks_consumables: "cup",
+  delivery: "truck",
+};
 
 const WORKING: Partial<Record<Run["phase"], string>> = {
   collecting: "Asking suppliers…",
@@ -65,18 +98,17 @@ function Working({ children, className }: { children: ReactNode; className?: str
 function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
   const id = useId();
   return (
-    <section
-      aria-labelledby={id}
-      className="rounded-[20px] border border-white/[0.08] bg-surface p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_1px_2px_rgba(0,0,0,0.25)] sm:p-8"
-    >
-      <p aria-hidden className={EYEBROW}>
-        Step {n} of 3
-      </p>
-      <h2 id={id} className="mt-2 text-[22px] font-semibold leading-tight tracking-[-0.015em] text-text sm:text-[24px]">
-        <span className="sr-only">Step {n} of 3: </span>
-        {title}
-      </h2>
-      <div className="mt-6">{children}</div>
+    <section aria-labelledby={id} className="rounded-card border border-hairline bg-card shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-hairline px-5 py-4 sm:px-6">
+        <h2 id={id} className="text-[19px] font-semibold leading-tight tracking-[-0.01em] text-text">
+          <span className="sr-only">Step {n} of 3: </span>
+          {title}
+        </h2>
+        <p aria-hidden className="text-[14px] text-muted">
+          Step {n} of 3
+        </p>
+      </div>
+      <div className="p-5 sm:p-6">{children}</div>
     </section>
   );
 }
@@ -87,13 +119,16 @@ function mealCount(s: PlanSelection): number {
 
 type Row = { role: string; name: string; detail: string | null; price: string };
 
-function rowFor(run: Run, s: PlanSelection): Row {
+function rowFor(run: Run, s: PlanSelection, deliveryName: string | null): Row {
   const offer = run.offers.find((o) => o.id === s.offerId && o.revision === s.offerRevision);
   const time = offer ? formatLocal(offer.fulfillment.timeLocal) : null;
   const detail: string[] = [];
   if (s.group === "meals") {
     detail.push(`${mealCount(s)} meals (${s.coverage.meal_vegetarian ?? 0} vegetarian)`);
-    if (time) detail.push(`${offer?.fulfillment.mode === "pickup_only" ? "picked up at" : "at your hall by"} ${time}`);
+    if (time) {
+      if (offer?.fulfillment.mode !== "pickup_only") detail.push(`at your hall by ${time}`);
+      else detail.push(deliveryName ? `picked up by ${deliveryName} at ${time}` : `ready at ${time}`);
+    }
   } else if (s.group === "delivery" && time) {
     detail.push(`at your hall by ${time}`);
   }
@@ -105,8 +140,16 @@ function Sep() {
   return <span className="sr-only"> · </span>;
 }
 
-function Dot({ tone = "mint" }: { tone?: "mint" | "muted" }) {
-  return <span aria-hidden className={cx("mt-[9px] inline-block h-1.5 w-1.5 shrink-0 rounded-full", tone === "mint" ? "bg-mint" : "bg-muted/60")} />;
+/** A soft tinted notice row: small icon, one sentence. */
+function Notice({ icon, children }: { icon: keyof typeof ICON_PATHS; children: ReactNode }) {
+  return (
+    <li className="flex items-start gap-3 rounded-xl bg-mint/[0.06] px-3.5 py-3 text-[15px] leading-snug text-text">
+      <span aria-hidden className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mint/[0.14] text-mint">
+        <Icon name={icon} size={14} />
+      </span>
+      <span className="pt-0.5">{children}</span>
+    </li>
+  );
 }
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -121,7 +164,7 @@ function swapReason(plan: Plan, from: string): string | null {
   const note = plan.changeSummary.widened;
   if (!note) return null;
   const name = escapeRe(from);
-  if (new RegExp(`Keeping ${name} would exceed the budget by`).test(note)) return "to stay within the budget";
+  if (new RegExp(`Keeping ${name} would exceed the budget by`).test(note)) return `to stay under ${formatCents(plan.budget.budgetCents)}`;
   const fails = new RegExp(`Keeping ${name} fails ([a-z_, ]+?)(?:;|\\.)`).exec(note)?.[1];
   if (fails) {
     const codes = fails.split(",").map((c) => c.trim());
@@ -146,65 +189,101 @@ function changeSentences(plan: Plan): string[] {
   return out;
 }
 
+function Stat({ label, value, tone, className }: { label: string; value: string; tone: "text" | "mint" | "muted"; className?: string }) {
+  return (
+    <div className={cx("rounded-xl border border-hairline bg-card-2 px-4 py-3.5", className)}>
+      <p className={cx("text-[13px] font-medium", tone === "mint" ? "text-mint" : "text-muted")}>{label}</p>{" "}
+      <p
+        className={cx(
+          "num mt-1 font-semibold leading-none tracking-[-0.02em]",
+          tone === "text" ? "text-[28px] text-text" : tone === "mint" ? "text-[22px] text-mint" : "text-[22px] text-muted",
+        )}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
 function PlanList({ run, plan }: { run: Run; plan: Plan }) {
   const order: PlanSelection["group"][] = ["meals", "drinks_consumables", "delivery"];
   const rows = [...plan.selections].sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
+  const deliveryName = plan.selections.find((s) => s.group === "delivery")?.merchantName ?? null;
   const refunds = run.orders.filter((o) => (o.cancellation?.refundCents ?? 0) > 0);
+  const total = plan.totals.totalCents;
+  const budget = plan.budget.budgetCents;
   return (
     <div>
-      <ul className="border-t border-white/[0.08]">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat label="Total" value={formatCents(total)} tone="text" className="col-span-2 sm:col-span-1" />
+        <Stat label="Money left" value={formatCents(plan.budget.remainingCents)} tone="mint" />
+        {budget > 0 ? <Stat label="Budget" value={formatCents(budget)} tone="muted" /> : null}
+      </div>
+      {budget > 0 ? (
+        <div className="mt-5">
+          <Meter value={total} max={budget} />
+          <p className="num mt-2 flex justify-between gap-4 text-[13px] text-muted">
+            <span>{formatCents(total)} planned</span> <span>{formatCents(budget)} budget</span>
+          </p>
+        </div>
+      ) : null}
+      <ul className="mt-5 divide-y divide-hairline border-y border-hairline">
         {rows.map((s) => {
-          const r = rowFor(run, s);
+          const r = rowFor(run, s, deliveryName);
           return (
-            <li
-              key={`${s.offerId}@${s.offerRevision}`}
-              className="grid grid-cols-[1fr_auto] items-baseline gap-x-4 gap-y-1 border-b border-white/[0.06] py-4 sm:grid-cols-[148px_1fr_auto] sm:py-5"
-            >
-              <span className={cx(EYEBROW, "col-span-2 sm:col-span-1")}>{r.role}</span>
-              <Sep />
-              <span className="min-w-0">
-                <span className="block text-[17px] font-medium leading-snug tracking-[-0.01em] text-text">{r.name}</span>
+            <li key={`${s.offerId}@${s.offerRevision}`} className="flex items-center gap-3.5 py-3.5 sm:gap-4 sm:py-4">
+              <IconCircle>
+                <Icon name={ROLE_ICON[s.group]} />
+              </IconCircle>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[12px] font-medium uppercase tracking-[0.06em] text-muted">{r.role}</span>
+                <Sep />
+                <span className="block text-[16px] font-medium leading-snug tracking-[-0.01em] text-text">{r.name}</span>
                 {r.detail ? (
                   <>
                     <Sep />
-                    <span className="mt-1 block text-[14px] leading-snug text-muted">{r.detail}</span>
+                    <span className="mt-0.5 block text-[14px] leading-snug text-muted">{r.detail}</span>
                   </>
                 ) : null}
               </span>
               <Sep />
-              <span className="num text-right text-[17px] text-text">{r.price}</span>
+              <span className="num shrink-0 text-right text-[16px] font-medium text-text">{r.price}</span>
             </li>
           );
         })}
       </ul>
-      <div className="mt-6 grid gap-2">
-        <p className="flex items-baseline justify-between gap-4">
-          <span className="text-[15px] text-muted">Total</span>{" "}
-          <span className="num text-[30px] font-semibold leading-none tracking-[-0.02em] text-text sm:text-[32px]">{formatCents(plan.totals.totalCents)}</span>
-        </p>
-        <p className="flex items-baseline justify-between gap-4 text-mint">
-          <span className="text-[15px]">Money left</span>{" "}
-          <span className="num text-[17px] font-medium">{formatCents(plan.budget.remainingCents)}</span>
-        </p>
-      </div>
       {refunds.length ? (
-        <ul className="mt-5 space-y-2 border-t border-white/[0.06] pt-5">
+        <ul className="mt-4 space-y-2">
           {refunds.map((o) => (
-            <li key={o.id} className="flex gap-3 text-[15px] leading-relaxed text-text">
-              <Dot />
-              <span>{`You would get ${formatCents(o.cancellation!.refundCents)} back from ${o.merchantName}.`}</span>
-            </li>
+            <Notice key={o.id} icon="refund">{`You would get ${formatCents(o.cancellation!.refundCents)} back from ${o.merchantName}.`}</Notice>
           ))}
         </ul>
       ) : null}
-      <p className="mt-5 text-[13px] text-muted">This is a practice run. Nothing is really ordered.</p>
+      <p className="mt-4 text-[13px] text-muted">This is a practice run. Nothing is really ordered.</p>
     </div>
+  );
+}
+
+/** Quiet secondary link to the page that shows how the plan was put together. */
+function HowFound({ className }: { className?: string }) {
+  return (
+    <Link
+      href="/market"
+      prefetch={false}
+      className={cx(
+        "inline-flex min-h-12 items-center justify-center gap-1.5 rounded-[10px] px-2 text-[15px] font-medium text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60",
+        className,
+      )}
+    >
+      See how the plan was found
+      <Icon name="arrow" size={16} />
+    </Link>
   );
 }
 
 function ApproveButton({ gate, onApprove, busy }: { gate: ApprovalGate; onApprove: () => void; busy: boolean }) {
   return (
-    <button type="button" className={cx(BIG_BUTTON, PRIMARY, "mt-7 w-full sm:w-auto")} disabled={!gate.enabled} onClick={onApprove}>
+    <button type="button" className={cx(BIG_BUTTON, PRIMARY, "w-full sm:w-auto")} disabled={!gate.enabled} onClick={onApprove}>
       {busy ? "Saving…" : "Yes, use this plan"}
     </button>
   );
@@ -235,7 +314,7 @@ function AskStep({ run, busy, onFind }: { run: Run; busy: boolean; onFind: (inpu
           Tell us about your event
         </label>
         <textarea id={`${id}-text`} value={text} onChange={(e) => setText(e.target.value)} rows={5} className={cx(FIELD, "resize-y leading-relaxed")} disabled={busy} spellCheck />
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-1">
           <div>
             <label htmlFor={`${id}-date`} className={LABEL}>
               Day of the event
@@ -246,10 +325,23 @@ function AskStep({ run, busy, onFind }: { run: Run; busy: boolean; onFind: (inpu
             <label htmlFor={`${id}-time`} className={LABEL}>
               Pretend it is this time on the day
             </label>
-            <input id={`${id}-time`} type="time" step={60} value={nowLocal} onChange={(e) => setNowLocal(e.target.value)} className={FIELD} disabled={busy} required />
+            <input
+              id={`${id}-time`}
+              type="time"
+              step={60}
+              value={nowLocal}
+              onChange={(e) => setNowLocal(e.target.value)}
+              className={FIELD}
+              disabled={busy}
+              required
+              aria-describedby={`${id}-time-hint`}
+            />
+            <p id={`${id}-time-hint`} className={HINT}>
+              We use this to check the food arrives in time.
+            </p>
           </div>
         </div>
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5 lg:flex-col lg:items-stretch lg:gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5 lg:flex-col lg:items-stretch lg:gap-3">
           <button type="submit" className={cx(BIG_BUTTON, PRIMARY, "w-full whitespace-nowrap sm:w-auto lg:w-full")} disabled={!canFind}>
             Find me a plan
           </button>
@@ -303,6 +395,7 @@ function PlanStep({ run, gate, pending, onApprove, onBudget }: { run: Run; gate:
         <div className="mt-5">
           <PlanList run={run} plan={plan} />
         </div>
+        <HowFound className="-ml-2 mt-3" />
       </div>
     );
   } else if (plan && (run.phase === "proposed" || run.phase === "needs_approval")) {
@@ -312,19 +405,21 @@ function PlanStep({ run, gate, pending, onApprove, onBudget }: { run: Run; gate:
       <div>
         <h3 className="text-[20px] font-semibold tracking-[-0.01em] text-text">{fixed ? "Here is the fixed plan." : "Here is your plan."}</h3>
         {changes.length ? (
-          <ul className="mt-4 space-y-2 rounded-xl border border-white/[0.06] bg-ink/40 px-4 py-3.5">
+          <ul className="mt-4 space-y-2">
             {changes.map((c) => (
-              <li key={c} className="flex gap-3 text-[15px] leading-relaxed text-text">
-                <Dot />
-                <span>{c}</span>
-              </li>
+              <Notice key={c} icon="swap">
+                {c}
+              </Notice>
             ))}
           </ul>
         ) : null}
         <div className="mt-5">
           <PlanList run={run} plan={plan} />
         </div>
-        <ApproveButton gate={gate} onApprove={onApprove} busy={pending === "Approve"} />
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <ApproveButton gate={gate} onApprove={onApprove} busy={pending === "Approve"} />
+          <HowFound />
+        </div>
       </div>
     );
   } else {
@@ -363,29 +458,50 @@ function ChangeStep({ run, pending, onDisrupt }: { run: Run; pending: string | n
       ) : !plan ? (
         <p className="mb-5 text-[16px] text-muted">These work once you have a plan.</p>
       ) : null}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <button type="button" className={cx(BIG_BUTTON, SECONDARY, "w-full")} disabled={!enabled || !meal} onClick={() => meal && onDisrupt({ type: "supplier_unavailable", merchantId: meal.merchantId })}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1.4fr]">
+        <button
+          type="button"
+          className={cx(TILE, "min-h-16 hover:border-white/[0.16] hover:bg-[#222327] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/60 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:border-hairline disabled:hover:bg-card-2")}
+          disabled={!enabled || !meal}
+          onClick={() => meal && onDisrupt({ type: "supplier_unavailable", merchantId: meal.merchantId })}
+        >
+          <IconCircle>
+            <Icon name="cancel" />
+          </IconCircle>
           The food place cancelled
         </button>
         <button
           type="button"
-          className={cx(BIG_BUTTON, SECONDARY, "w-full")}
+          className={cx(TILE, "min-h-16 hover:border-white/[0.16] hover:bg-[#222327] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/60 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:border-hairline disabled:hover:bg-card-2")}
           disabled={!enabled || !late}
           onClick={() => late && onDisrupt({ type: "delivery_delayed", offerId: late.offerId, delayMinutes: 25 })}
         >
+          <IconCircle>
+            <Icon name="clock" />
+          </IconCircle>
           Delivery is late
         </button>
         <form
-          className="flex flex-col gap-3 border-t border-white/[0.06] pt-5 sm:col-span-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+          className="flex flex-col gap-3 rounded-2xl border border-hairline bg-card-2 p-4 sm:col-span-2 xl:col-span-1"
           onSubmit={(e) => {
             e.preventDefault();
             if (enabled && peopleOk) onDisrupt({ type: "headcount_changed", headcount: n });
           }}
         >
-          <label htmlFor={`${id}-people`} className="block text-[16px] font-medium text-text">
-            More or fewer people
-          </label>
-          <div className="flex gap-2 sm:w-[300px]">
+          <div className="flex items-center gap-3.5 xl:flex-col xl:items-start xl:gap-3">
+            <IconCircle>
+              <Icon name="people" />
+            </IconCircle>
+            <div>
+              <label htmlFor={`${id}-people`} className="block text-[16px] font-medium leading-snug text-text">
+                More or fewer people
+              </label>
+              <p id={`${id}-people-hint`} className="mt-0.5 text-[13px] leading-snug text-muted">
+                How many people now?
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
             <input
               id={`${id}-people`}
               type="number"
@@ -393,11 +509,13 @@ function ChangeStep({ run, pending, onDisrupt }: { run: Run; pending: string | n
               min={1}
               max={5000}
               value={people}
+              placeholder="How many people now?"
+              aria-describedby={`${id}-people-hint`}
               onChange={(e) => setPeople(e.target.value)}
-              className={cx(FIELD, "num h-[52px] min-h-12 min-w-0 flex-1 py-0")}
+              className={cx(FIELD, "num h-12 min-h-12 min-w-0 flex-1 py-0")}
               disabled={!enabled}
             />
-            <button type="submit" className={cx(BIG_BUTTON, SECONDARY)} disabled={!enabled || !peopleOk}>
+            <button type="submit" className={cx(BIG_BUTTON, SECONDARY, "shrink-0 px-4")} disabled={!enabled || !peopleOk}>
               Change
             </button>
           </div>

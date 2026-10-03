@@ -195,3 +195,30 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
     </div>
   );
 }
+
+const ICON_CIRCLE: Record<Tone, string> = {
+  neutral: "bg-white/[0.07] text-text",
+  mint: "bg-mint/[0.12] text-mint",
+  amber: "bg-amber/[0.12] text-amber",
+  red: "bg-red/[0.12] text-red",
+  accent: "bg-accent/[0.12] text-accent",
+};
+
+/** A 36px tinted circle holding a small glyph (transaction-row style). Decorative: the row text carries the meaning. */
+export function IconCircle({ children, tone = "neutral", className }: { children: ReactNode; tone?: Tone; className?: string }) {
+  return (
+    <span aria-hidden className={cx("inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full", ICON_CIRCLE[tone], className)}>
+      {children}
+    </span>
+  );
+}
+
+/** Thin progress bar (value of max, clamped to 0..100%). Visual only: always pair it with the numbers as text. */
+export function Meter({ value, max, className, barClassName }: { value: number; max: number; className?: string; barClassName?: string }) {
+  const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
+  return (
+    <div aria-hidden className={cx("h-1.5 overflow-hidden rounded-full bg-white/[0.07]", className)}>
+      <div className={cx("h-full rounded-full bg-mint", barClassName)} style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
