@@ -12,7 +12,9 @@ containment app with its own npm lockfile, Vitest suite, and Vercel config. Per 
 brief's own default, Clearing is built as an isolated `clearing/` project on the
 designated branch. A brand-new GitHub repository cannot be created from this session
 (GitHub scope is limited to `rahul-innv/truthlease`); the project is self-contained so
-it can be split out later with `git subtree split -P clearing`.
+it can be split out later with `git subtree split -P clearing`. (Done on Oct 3: the project now
+lives in `github.com/Rahul-Innv/Clearing` with its full history; this document keeps the original
+context.)
 
 **Keep.** The core loop (request → competing offers → valid plan → disruption →
 repaired plan), integer-cent arithmetic, a deterministic solver that owns totals and

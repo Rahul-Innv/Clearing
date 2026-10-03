@@ -1,5 +1,6 @@
 import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { resolve } from "node:path";
 
 /**
  * Shared helpers for the browser specs.
@@ -9,7 +10,8 @@ import { mkdirSync } from "node:fs";
  * only change what happens when a wait *fails* (they say whether the server or the UI is at fault).
  */
 
-export const SCRATCH = "/tmp/claude-0/-home-user-truthlease/3b72e7ba-b5da-56cf-a9b0-0dbee746494c/scratchpad";
+/** Screenshot output directory (git-ignored); override with CLEARING_E2E_SCREENS. */
+export const SCRATCH = process.env.CLEARING_E2E_SCREENS ?? resolve(process.cwd(), "e2e/.screens");
 
 export const PRESET_REQUEST_TEXT =
   "Dinner for 60 hackathon attendees at our already-booked venue. At least 20 need vegetarian meals; the rest are flexible. Include nonalcoholic drinks, plates, and utensils. Everything ready by 6:30 PM. Maximum $1,000 including all fees and delivery.";

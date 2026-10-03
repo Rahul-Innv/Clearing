@@ -328,7 +328,7 @@ export function openStore(file: string): Store {
   };
 }
 
-/** Default SQLite path, relative to the clearing/ project directory. */
+/** Default SQLite path, relative to the project directory. */
 export function appDbPath(env: NodeJS.ProcessEnv = process.env): string {
   return path.resolve(/* turbopackIgnore: true */ process.cwd(), env.CLEARING_DB_PATH || ".data/clearing.sqlite");
 }

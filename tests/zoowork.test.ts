@@ -1,3 +1,5 @@
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { liveProvider } from "@/lib/providers/live";
 import { zooworkTransport, type ZooworkClientLike, type ZooworkEventHelpers } from "@/lib/providers/zoowork";
@@ -44,7 +46,7 @@ function fakeClient(reply: (content: string) => Ev[]) {
   return { client, calls };
 }
 
-const tmpFile = () => `/tmp/claude-0/-home-user-truthlease/3b72e7ba-b5da-56cf-a9b0-0dbee746494c/scratchpad/zw-agent-${Math.random().toString(36).slice(2)}.json`;
+const tmpFile = () => join(tmpdir(), `clearing-zw-agent-${Math.random().toString(36).slice(2)}.json`);
 
 describe("ZooWork transport (offline, fake client)", () => {
   it("creates the planner agent once, picks the selectable default model, and parses a JSON reply", async () => {

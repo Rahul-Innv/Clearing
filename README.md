@@ -17,7 +17,7 @@ for fresh approval. Built for small hackathons, meetups, and team gatherings.
 Requires Node ≥ 22.13 (uses the built-in `node:sqlite`). No credentials needed.
 
 ```bash
-cd clearing
+git clone https://github.com/Rahul-Innv/Clearing.git && cd Clearing
 npm install
 npm run dev          # http://localhost:3100
 ```
@@ -28,7 +28,7 @@ Production mode (what the browser tests run against):
 npm run build && npm start
 ```
 
-State lives in `clearing/.data/clearing.sqlite` (git-ignored). The **Reset** control in the
+State lives in `.data/clearing.sqlite` (git-ignored). The **Reset** control in the
 top bar, or `POST /api/reset`, deletes all runs and recreates the editable preset.
 
 ## The demo
@@ -231,7 +231,7 @@ public deployment, no paid provisioning, and no real-world fulfillment.
 
 ## Deploy to Vercel
 
-`vercel.json` is mode-neutral. Choose the mode with environment variables in the Vercel project settings: **browser demo mode** (`NEXT_PUBLIC_CLEARING_RUNTIME=browser`, no database, per-device state) or **server mode on Supabase** (`CLEARING_STORE=supabase`, `SUPABASE_DB_URL`, `NEXT_PUBLIC_CLEARING_TRANSPORT=poll`; shared state, agent API and attendee links). Root Directory must be `clearing`.
+`vercel.json` is mode-neutral. Choose the mode with environment variables in the Vercel project settings: **browser demo mode** (`NEXT_PUBLIC_CLEARING_RUNTIME=browser`, no database, per-device state) or **server mode on Supabase** (`CLEARING_STORE=supabase`, `SUPABASE_DB_URL`, `NEXT_PUBLIC_CLEARING_TRANSPORT=poll`; shared state, agent API and attendee links). The app is the repository root, so leave Vercel's Root Directory empty.
 
 A labelled demo mode, the **browser runtime**, makes the organizer console deployable with no
 database and no credentials: the same service, solver, seller and buyer code runs inside the
@@ -239,12 +239,11 @@ visitor's browser against an in-memory store saved to `localStorage` (key `clear
 The badge reads "Demo suppliers · Local rules · Simulated orders · Browser runtime" and the
 connection indicator reads "On-device". Server mode stays the default everywhere else.
 
-1. In Vercel, import the GitHub repository.
-2. Set **Root Directory** to `clearing` (framework preset: Next.js; `clearing/vercel.json` already
-   sets the build command).
-3. Under Environment Variables, set `NEXT_PUBLIC_CLEARING_RUNTIME=browser` (it is read at build time;
-   `vercel.json` also sets it for the build). Add no other variables: no key is needed or used.
-4. Deploy.
+1. In Vercel, import the GitHub repository `Rahul-Innv/Clearing` (framework preset: Next.js; keep
+   Root Directory empty; `vercel.json` already sets the install and build commands).
+2. Under Environment Variables, set `NEXT_PUBLIC_CLEARING_RUNTIME=browser` (it is read at build time).
+   Add no other variables: no key is needed or used.
+3. Deploy.
 
 What works: the full organizer console — preset request, confirm, MARKET CLEARED ($784.40),
 approve, disruptions (cancel, delay, headcount), PLAN RECOVERED ($994.14), budget changes,
@@ -275,18 +274,17 @@ SQLite stays the default; this mode is on only when both `CLEARING_STORE=supabas
 `SUPABASE_DB_URL` are set.
 
 1. Create a Supabase project.
-2. In the Supabase dashboard open **SQL Editor**, paste `clearing/supabase/schema.sql`, and run it
+2. In the Supabase dashboard open **SQL Editor**, paste `supabase/schema.sql`, and run it
    (idempotent; it also enables Row Level Security with no policies so the public Data API cannot
    read these tables).
-3. In Vercel, import the repository and set **Root Directory** to `clearing`.
+3. In Vercel, import the repository (Root Directory empty).
 4. Set three environment variables in Vercel:
    - `CLEARING_STORE=supabase`
    - `SUPABASE_DB_URL` = the **Transaction pooler** URI from Supabase → **Connect** (port 6543;
      the app uses `prepare: false` and one connection per function instance, as the pooler requires)
    - `NEXT_PUBLIC_CLEARING_TRANSPORT=poll` (read at build time; the console polls instead of SSE)
-5. `clearing/vercel.json` currently builds the browser runtime (`NEXT_PUBLIC_CLEARING_RUNTIME=browser`).
-   For this mode the build command must be plain `next build` with that variable unset: edit
-   `vercel.json` (or remove it) before deploying.
+5. Leave `NEXT_PUBLIC_CLEARING_RUNTIME` unset (`vercel.json` is mode-neutral; the build runs plain
+   `next build`, which produces the server build).
 6. Deploy. The build never connects to the database.
 
 What works: everything the local server mode does — the console, the agent API (`/api/agent/*`),

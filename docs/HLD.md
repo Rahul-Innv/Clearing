@@ -127,7 +127,7 @@ Isolation: a seller prompt contains only that seller's catalog, policy, the rele
 
 ## 9. Runtime and deployment
 
-Designed for one long-lived local Node process (`next start`). SQLite lives at `clearing/.data/`. Background jobs run in-process; the pipeline is resumable from stored state if the process restarts. Serverless hosts would lose in-process jobs and local files; this is documented, not worked around. No public deployment, no paid provisioning.
+Designed for one long-lived local Node process (`next start`). SQLite lives at `.data/`. Background jobs run in-process; the pipeline is resumable from stored state if the process restarts. Serverless hosts would lose in-process jobs and local files; this is documented, not worked around. No public deployment, no paid provisioning.
 
 ## 10. Verification strategy
 

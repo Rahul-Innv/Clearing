@@ -68,7 +68,7 @@ Setup for each is documented. ZooWork, BAND, Moss and Tavily are wired into the 
 ## 7. Run and verify
 
 ```bash
-cd clearing && npm install      # Node >= 22.13, no credentials
+npm install                     # Node >= 22.13, no credentials
 npm run dev                     # http://localhost:3100
 npm run typecheck && npm run lint
 npm test                        # 269 unit tests, 11 files
@@ -81,5 +81,5 @@ Counts are as recorded in BUILD_PLAN §5; re-run before presenting. Do not run `
 ## 8. Team and links
 
 - Team: [name]
-- Repo: https://github.com/Rahul-Innv/truthlease (folder clearing/, branch claude/build-clearing-marketplace-t9gbx8)
+- Repo: https://github.com/Rahul-Innv/Clearing (branch main)
 - Demo video: [link]

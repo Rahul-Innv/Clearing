@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_CLEARING_RUNTIME: browserRuntime ? "browser" : "server" },
   // Secrets never reach the browser: only NEXT_PUBLIC_* would, and we define none.
   poweredByHeader: false,
-  // This app lives inside another repository that has its own lockfile; pin the workspace root.
+  // Pin the workspace root so a lockfile in a parent directory (e.g. a monorepo checkout) is never picked up.
   turbopack: {
     root: path.resolve(import.meta.dirname),
     ...(browserRuntime ? { resolveAlias: { "node:fs": { browser: browserNodeStub }, "node:path": { browser: browserNodeStub } } } : {}),

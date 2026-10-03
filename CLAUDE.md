@@ -1,8 +1,8 @@
 # Clearing — project instructions
 
-Clearing lives in `clearing/` inside the TruthLease repository but is an independent
-Next.js app. Treat it as its own project: run commands from `clearing/`, keep its
-lockfile, and do not touch the TruthLease code around it.
+Clearing is a standalone Next.js app in this repository (`github.com/Rahul-Innv/Clearing`).
+It was first developed under `clearing/` in the TruthLease repository and split out with
+`git subtree split`, which is why early commit messages carry a `clearing:` prefix.
 
 ## Honesty rules (non-negotiable)
 - Every run is labelled on four axes: reasoning (local rules | live model), supply
