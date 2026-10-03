@@ -2,7 +2,7 @@
   "name": "clearing",
   "version": "0.1.0",
   "private": true,
-  "description": "Clearing — self-forming, self-repairing markets for small-event logistics (hackathon demo).",
+  "description": "Clearing \u2014 self-forming, self-repairing markets for small-event logistics (hackathon demo).",
   "engines": {
     "node": ">=22.13"
   },
@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:browser": "playwright test --config playwright.browser.config.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
     "reset": "tsx scripts/reset.ts"
   },
