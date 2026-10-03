@@ -45,7 +45,7 @@ test("organizer journey: request, clear, approve, recover, refresh, infeasible, 
   const plan = planAside(page);
 
   // ---- 1. Preset request, confirming, nothing missing ----------------------------------------
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
   await expect(phaseChip(page)).toHaveText("Confirm requirements", { useInnerText: true });
   await expect(page.getByText("Demo suppliers · Local rules · Simulated orders")).toBeVisible();

@@ -36,7 +36,7 @@ test("attendee opt-in: link, two phone respondents, live counts, apply to requir
   const consoleWatch = watchConsole(page);
 
   // ---- 1. Organizer creates the link -----------------------------------------------------------
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
   const brief = briefAside(page);
   const panel = brief.locator("section").filter({ has: page.getByRole("heading", { name: "Attendee opt-in" }) });

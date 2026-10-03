@@ -136,6 +136,8 @@ export function TopBar({
   onHelp,
   resetDisabled,
   runtime = "server",
+  view,
+  onToggleView,
 }: {
   phase: Phase | null;
   connection: Connection;
@@ -145,6 +147,9 @@ export function TopBar({
   onHelp: () => void;
   resetDisabled?: boolean;
   runtime?: ClientRuntimeMode;
+  /** Which console layout is showing; the toggle is hidden until it is known. */
+  view?: "simple" | "full";
+  onToggleView?: () => void;
 }) {
   return (
     <header className="relative z-30 flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line bg-surface px-4 py-2">
@@ -164,6 +169,11 @@ export function TopBar({
         <SimulationBadge reasoning={status?.reasoning.mode} runtime={runtime} />
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
+        {view && onToggleView ? (
+          <Button variant="secondary" size="sm" onClick={onToggleView} aria-pressed={view === "full"}>
+            {view === "simple" ? "Show details" : "Simple view"}
+          </Button>
+        ) : null}
         <ConnectionState connection={connection} />
         <IntegrationPopover status={status} onOpen={onStatusOpen} runtime={runtime} />
         <span className="hidden sm:block">

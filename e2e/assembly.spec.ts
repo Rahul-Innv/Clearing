@@ -20,7 +20,7 @@ import {
 test("supply assembly: two kitchens plus delivery clear a 130-attendee request", async ({ page, request }) => {
   const consoleWatch = watchConsole(page);
   await resetViaApi(request);
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
 
   const box = requestBox(page);

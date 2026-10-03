@@ -27,7 +27,7 @@ import {
 test("impossible budget: an honest no-feasible-plan with the exact gap, and nothing to approve", async ({ page, request }, testInfo) => {
   const consoleWatch = watchConsole(page);
   await resetViaApi(request);
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
 
   // Replace "$1,000" with "$500" in the request and re-interpret it.
@@ -85,7 +85,7 @@ test("keyboard: Tab to Confirm, Enter, a to approve, Enter on a node opens the d
   test.setTimeout(120_000);
   const consoleWatch = watchConsole(page);
   await resetViaApi(request);
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
   await expect(confirmButton(page)).toBeEnabled();
 
@@ -165,7 +165,7 @@ test("keyboard: Tab to Confirm, Enter, a to approve, Enter on a node opens the d
 // focus is inside the dialog, but on an unlabelled generic element.
 test("offer drawer: opening it by keyboard puts focus on the Close button", async ({ page, request }) => {
   await resetViaApi(request);
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
   const first = page.locator("button[data-merchant]").first();
   await first.focus();
@@ -180,7 +180,7 @@ test("mobile layout: no horizontal scroll, sticky approve bar, readable plan tot
   test.setTimeout(120_000);
   const consoleWatch = watchConsole(page);
   await resetViaApi(request);
-  await page.goto("/");
+  await page.goto("/?view=full");
   await waitForPhase(page, "confirming");
 
   // The page is usable at 390 px before the market opens, too.

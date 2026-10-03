@@ -54,7 +54,7 @@ test("browser runtime: confirm, clear, approve, cancel, recover, reload, reset â
   const plan = planAside(page);
 
   // Fresh device state.
-  await page.goto("/");
+  await page.goto("/?view=full");
   await page.evaluate(() => localStorage.removeItem("clearing:runtime:v1"));
   await page.reload();
 
@@ -136,7 +136,7 @@ test("browser runtime: server-only pages say so", async ({ page, request }) => {
 test("browser runtime: a refresh mid-pipeline re-arms the job and the market still clears", async ({ page, request }) => {
   const probe = await request.get("/api/status");
   test.skip(probe.status() !== 501, "server is not a browser-runtime build");
-  await page.goto("/");
+  await page.goto("/?view=full");
   await page.evaluate(() => localStorage.removeItem("clearing:runtime:v1"));
   await page.reload();
   await uiPhase(page, "confirming");

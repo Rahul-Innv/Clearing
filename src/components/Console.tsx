@@ -10,6 +10,7 @@ import { HistoryPanel } from "./HistoryPanel";
 import { MarketGraph, SignatureBanner } from "./MarketGraph";
 import { OfferDrawer } from "./OfferDrawer";
 import { ApproveBlock, PlanPanel } from "./PlanPanel";
+import { SimpleView } from "./SimpleView";
 import { TopBar } from "./TopBar";
 import { Button, Chip, Glyph, Kbd, cx } from "./ui";
 
@@ -59,8 +60,56 @@ function LoadingShell({ message }: { message: string }) {
   );
 }
 
+export type ConsoleView = "simple" | "full";
+const VIEW_KEY = "clearing:view";
+
+/** `?view=` wins; then the remembered choice (live console only); then simple. Static samples default to the full console. */
+function initialView(isSample: boolean): ConsoleView {
+  try {
+    const q = new URLSearchParams(window.location.search).get("view");
+    if (q === "simple" || q === "full") return q;
+  } catch {
+    // no URL access: fall through
+  }
+  if (isSample) return "full";
+  try {
+    const saved = window.localStorage.getItem(VIEW_KEY);
+    if (saved === "simple" || saved === "full") return saved;
+  } catch {
+    // storage blocked or unavailable: fall through
+  }
+  return "simple";
+}
+
 export function Console({ source, banner }: { source?: StaticSource; banner?: ReactNode }) {
   const stream = useRunStream(source ? { source } : {});
+  const [view, setView] = useState<ConsoleView | null>(null);
+  useEffect(() => {
+    // Resolved after mount so server and client render the same first frame.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setView(initialView(Boolean(source)));
+  }, [source]);
+  const toggleView = useCallback(() => {
+    setView((v) => {
+      const next: ConsoleView = v === "full" ? "simple" : "full";
+      try {
+        window.localStorage.setItem(VIEW_KEY, next);
+      } catch {
+        // not remembered; the toggle still works for this page
+      }
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("view")) {
+          url.searchParams.set("view", next);
+          window.history.replaceState(null, "", url);
+        }
+      } catch {
+        // URL not updated; harmless
+      }
+      return next;
+    });
+  }, []);
+  const simple = view === "simple";
   const { run, events, status, connection, pending, notice, commands, refreshStatus, dismissNotice } = stream;
   const [selected, setSelected] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
@@ -99,7 +148,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
   const [barRef, barHeight] = useElementHeight<HTMLDivElement>();
 
   return (
-    <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
+    <div className={cx("flex min-h-dvh flex-col", simple ? "" : "lg:h-dvh lg:overflow-hidden")}>
       <TopBar
         phase={run?.phase ?? null}
         connection={connection}
@@ -109,19 +158,32 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
         onHelp={() => setHelpOpen(true)}
         resetDisabled={pending !== null}
         runtime={stream.runtime}
+        view={view ?? undefined}
+        onToggleView={toggleView}
       />
       {banner}
-      {run ? (
+      {run && view === "full" ? (
         <div className="border-b border-line pb-3 empty:hidden lg:hidden">
           <SignatureBanner run={run} />
         </div>
       ) : null}
       <div aria-live="polite" className="sr-only">
-        {run ? announcement(run) : ""}
+        {run && view === "full" ? announcement(run) : ""}
       </div>
 
-      {!run ? (
+      {!run || !view ? (
         <LoadingShell message={connection === "reconnecting" ? "Reconnecting to the server…" : "Loading the current run…"} />
+      ) : simple ? (
+        <SimpleView
+          run={run}
+          gate={gate}
+          pending={pending}
+          onSubmit={(r) => commands.submitRequest(r)}
+          onConfirm={() => commands.confirm()}
+          onApprove={approve}
+          onDisrupt={(d) => void commands.disrupt(d)}
+          onBudget={(c) => void commands.updateBudget(c)}
+        />
       ) : (
         <main
           className="grid flex-1 grid-cols-1 pb-[var(--bar-h,9rem)] lg:min-h-0 lg:grid-cols-[272px_minmax(0,1fr)_320px] lg:pb-0 xl:grid-cols-[320px_minmax(0,1fr)_380px]"
@@ -160,7 +222,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
         </main>
       )}
 
-      {run ? (
+      {run && view === "full" ? (
         <div ref={barRef} className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-1px_0_rgba(255,255,255,0.02),0_-12px_32px_rgba(0,0,0,0.5)] lg:hidden">
           <div className="mb-2 flex items-center gap-2 text-[13px]">
             <span className="text-muted">{plan ? `Plan r${plan.revision}` : PHASE_META[run.phase].label}</span>
@@ -190,7 +252,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
           role={notice.tone === "error" ? "alert" : "status"}
           className={cx(
             "fixed right-4 z-40 w-[min(380px,calc(100vw-32px))] rounded-lg border bg-surface-2 px-4 py-3 shadow-xl shadow-black/40",
-            "bottom-40 lg:bottom-4",
+            simple ? "bottom-4" : "bottom-40 lg:bottom-4",
             notice.tone === "error" ? "border-red/50" : "border-line",
           )}
         >
