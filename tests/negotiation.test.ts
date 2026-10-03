@@ -221,12 +221,12 @@ describe("seller.respond: volume_discount", () => {
 
   it("declines below the first tier and says where volume pricing starts", () => {
     const d40 = demandFor({ headcount: 40, vegetarianMin: 10 });
-    expect(expectDeclined(ask(M.juniper, "volume_discount", { demand: d40 }))).toBe("Volume pricing starts at 50 units.");
+    expect(expectDeclined(ask(M.juniper, "volume_discount", { demand: d40 }))).toBe("Volume pricing starts at 50 units; this order has 40.");
     // Golden Hour: tier at 60. 59 is declined, 60 is accepted.
-    expect(expectDeclined(ask(M.goldenHour, "volume_discount", { demand: demandFor({ headcount: 59 }) }))).toBe("Volume pricing starts at 60 units.");
+    expect(expectDeclined(ask(M.goldenHour, "volume_discount", { demand: demandFor({ headcount: 59 }) }))).toBe("Volume pricing starts at 60 units; this order has 59.");
     expect(ask(M.goldenHour, "volume_discount", { demand: demandFor({ headcount: 60 }) }).outcome).toBe("revised");
     // Fogline counts drink servings only: 60 < 80.
-    expect(expectDeclined(ask(M.fogline, "volume_discount"))).toBe("Volume pricing starts at 80 units.");
+    expect(expectDeclined(ask(M.fogline, "volume_discount"))).toBe("Volume pricing starts at 80 units; this order has 60.");
     expect(ask(M.fogline, "volume_discount", { demand: demandFor({ headcount: 80 }) }).outcome).toBe("revised");
   });
 
@@ -429,6 +429,15 @@ describe("buyer.planRound", () => {
     expect(plan.requests.some((r) => r.lever === "later_pickup")).toBe(false);
   });
 
+  it("names the same quantity in the volume ask that the seller measures its tiers against", () => {
+    const plan = planRound(round0, initial.demand, 1, new Set(), initial.offers);
+    const fogline = must(plan.requests.find((r) => r.merchantId === M.fogline && r.lever === "volume_discount"));
+    expect(fogline.ask).toBe("Volume pricing for 60 drink servings?");
+    expect(expectDeclined(ask(M.fogline, "volume_discount"))).toBe("Volume pricing starts at 80 units; this order has 60.");
+    const golden = must(plan.requests.find((r) => r.merchantId === M.goldenHour && r.lever === "volume_discount"));
+    expect(golden.ask).toBe("Volume pricing for 60 meals?");
+  });
+
   it("round 2 asks the courier for a later_pickup window instead of the pickup supplier", () => {
     const plan = planRound(round0, initial.demand, 2, new Set(), initial.offers);
     const courier = must(plan.requests.find((r) => r.lever === "later_pickup"));
@@ -536,7 +545,7 @@ describe("two-round negotiation on the preset reproduces the simulate.ts transcr
   it("moves Fogline to 4:30 PM and declines its volume request", () => {
     expect(t(1, M.fogline, "earlier_slot").offer).toMatchObject({ revision: 2, totalCents: NEG.fogline.earlierSlotTotalCents });
     expect(t(1, M.fogline, "earlier_slot").offer?.fulfillment.timeLocal).toBe("16:30");
-    expect(t(1, M.fogline, "volume_discount")).toMatchObject({ outcome: "declined", reply: "Volume pricing starts at 80 units." });
+    expect(t(1, M.fogline, "volume_discount")).toMatchObject({ outcome: "declined", reply: "Volume pricing starts at 80 units; this order has 60." });
   });
 
   it("declines Bodega's volume request because its prices are fixed", () => {

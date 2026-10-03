@@ -237,7 +237,7 @@ function Coverage({ plan }: { plan: Plan }) {
               <tr key={r.label} className="border-t border-line/60">
                 <td className="py-1.5 pr-2 text-text">
                   {r.label}
-                  {flex ? <span className="block text-xs text-muted">vegetarian may cover</span> : null}
+                  {flex ? <span className="block text-xs text-muted">(vegetarian meals also count)</span> : null}
                 </td>
                 <td className="py-1.5 text-right text-muted">{r.required}</td>
                 <td className="py-1.5 text-right text-text">{r.supplied}</td>
@@ -450,7 +450,11 @@ function DisruptionControls({ run, plan, pending, onDisrupt }: { run: Run; plan:
   const [delayOffer, setDelayOffer] = useState("");
   const [minutes, setMinutes] = useState(25);
   const [headcount, setHeadcount] = useState(String(run.requirements?.headcount ?? 60));
-  const merchantValue = cancellable.some((s) => s.merchantId === merchant) ? merchant : cancellable[0]?.merchantId ?? "";
+  // No preselection: one stray click must not cancel a live supplier.
+  const merchantValue = cancellable.some((s) => s.merchantId === merchant) ? merchant : "";
+  // Suppliers in the plan with no active simulated order yet (e.g. a repaired plan awaiting approval).
+  const ordered = new Set(run.orders.filter((o) => o.status === "simulated_placed" || o.status === "simulated_confirmed").map((o) => o.merchantId));
+  const optionLabel = (s: { merchantId: string; merchantName: string }) => (ordered.has(s.merchantId) ? s.merchantName : `${s.merchantName} (proposed, not ordered)`);
   const delayValue = delayable.some((s) => s.offerId === delayOffer) ? delayOffer : delayable[0]?.offerId ?? "";
   const hc = Number(headcount);
   const hcValid = Number.isInteger(hc) && hc >= 1 && hc <= 5000 && hc !== run.requirements?.headcount;
@@ -474,11 +478,14 @@ function DisruptionControls({ run, plan, pending, onDisrupt }: { run: Run; plan:
           <div className="flex gap-2">
             <select id={`${id}-cancel`} className={cx(inputClass, "pr-8")} value={merchantValue} onChange={(e) => setMerchant(e.target.value)} disabled={!allowed || !cancellable.length}>
               {cancellable.length ? (
-                cancellable.map((s) => (
-                  <option key={s.merchantId} value={s.merchantId}>
-                    {s.merchantName}
-                  </option>
-                ))
+                <>
+                  <option value="">Choose a supplier…</option>
+                  {cancellable.map((s) => (
+                    <option key={s.merchantId} value={s.merchantId}>
+                      {optionLabel(s)}
+                    </option>
+                  ))}
+                </>
               ) : (
                 <option value="">No selected supplier</option>
               )}
@@ -502,7 +509,7 @@ function DisruptionControls({ run, plan, pending, onDisrupt }: { run: Run; plan:
             {delayable.length ? (
               delayable.map((s) => (
                 <option key={s.offerId} value={s.offerId}>
-                  {s.merchantName}
+                  {optionLabel(s)}
                 </option>
               ))
             ) : (

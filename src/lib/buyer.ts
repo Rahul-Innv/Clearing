@@ -8,6 +8,7 @@
  */
 import type { NegotiationLever, Offer } from "./contracts";
 import { nearMisses, type Candidate, type Demand, type SolveResult } from "./solver";
+import { primaryQty, primaryUnit } from "./offer-qty";
 import { toMinutes } from "./time";
 
 export interface CounterRequest {
@@ -21,6 +22,12 @@ export interface CounterRequest {
 
 export const MAX_REQUESTS_PER_ROUND = 6;
 export const MAX_ROUNDS = 2;
+
+/** The volume ask names the same quantity the seller measures its tiers against. */
+function volumeAsk(o: Offer): string {
+  const q = primaryQty(o);
+  return `Volume pricing for ${q} ${primaryUnit(o, q)}?`;
+}
 
 function leversFor(c: Candidate, demand: Demand, round: number): CounterRequest[] {
   const out: CounterRequest[] = [];
@@ -40,7 +47,7 @@ function leversFor(c: Candidate, demand: Demand, round: number): CounterRequest[
   // Price pressure on the largest tickets, feasible or over budget alike.
   const byCost = [...c.offers].filter((o) => o.fulfillment.mode !== "courier").sort((a, b) => b.totalCents - a.totalCents);
   for (const o of byCost.slice(0, 2)) {
-    out.push({ offerId: o.id, merchantId: o.merchantId, lever: "volume_discount", ask: `Volume pricing for ${o.lines.reduce((s, l) => s + l.qty, 0)} units?` });
+    out.push({ offerId: o.id, merchantId: o.merchantId, lever: "volume_discount", ask: volumeAsk(o) });
   }
   return out;
 }
