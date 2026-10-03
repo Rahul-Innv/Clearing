@@ -257,6 +257,19 @@ in-process and state is a local SQLite file. A serverless host would lose both, 
 deployment at https://clearing-pied.vercel.app runs the browser runtime described below (organizer
 console only). There is no paid provisioning and no real-world fulfillment.
 
+## Deploy the server mode to a container host (all integrations)
+
+The full server mode, including the ZooWork, Tavily, Moss, Novita and BAND options, needs one
+long-lived Node process. `Dockerfile` and `render.yaml` run it on any container host:
+
+1. On Render: **New → Blueprint**, pick this repository; it reads `render.yaml`. Paste
+   `ZOOWORK_API_KEY` and `TAVILY_API_KEY` when prompted (they are marked secret). Railway or Fly
+   work the same way from the `Dockerfile` with the same variables.
+2. The service listens on the host's `PORT`, answers `/api/status` for health checks, and keeps
+   SQLite on the container disk, so a redeploy starts with a fresh preset run. No database to set up.
+3. Open the service URL. The top bar reads "Live model"; the Integrations panel shows ZooWork and
+   Tavily as connected and, after the first successful call, "live-verified this process".
+
 ## Deploy to Vercel
 
 `vercel.json` is mode-neutral. Choose the mode with environment variables in the Vercel project settings: **browser demo mode** (`NEXT_PUBLIC_CLEARING_RUNTIME=browser`, no database, per-device state) or **server mode on Supabase** (`CLEARING_STORE=supabase`, `SUPABASE_DB_URL`, `NEXT_PUBLIC_CLEARING_TRANSPORT=poll`; shared state, agent API and attendee links). The app is the repository root, so leave Vercel's Root Directory empty.

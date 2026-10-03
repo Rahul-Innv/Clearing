@@ -1,0 +1,16 @@
+# Render blueprint: New -> Blueprint -> pick this repo. Fill the two secret keys when asked.
+services:
+  - type: web
+    name: clearing
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/status
+    envVars:
+      - key: CLEARING_REASONING
+        value: zoowork
+      - key: ZOOWORK_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: CLEARING_PACE_MS
+        value: "350"
