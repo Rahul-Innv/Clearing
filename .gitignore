@@ -16,3 +16,8 @@ e2e/.screens/
 *.tsbuildinfo
 next-env.d.ts
 demo-video/
+
+# Owner-only notes, never committed
+local-notes/
+*.pem
+*.key

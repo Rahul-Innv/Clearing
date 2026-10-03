@@ -2,7 +2,13 @@
   "name": "clearing",
   "version": "0.1.0",
   "private": true,
-  "description": "Clearing \u2014 self-forming, self-repairing markets for small-event logistics (hackathon demo).",
+  "description": "Clearing — self-forming, self-repairing markets for small-event logistics (hackathon demo).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rahul-Innv/Clearing.git"
+  },
+  "homepage": "https://clearing-pied.vercel.app",
   "engines": {
     "node": ">=22.13"
   },
