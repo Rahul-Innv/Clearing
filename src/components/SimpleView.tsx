@@ -9,6 +9,7 @@
 import { useId, useState, type ReactNode } from "react";
 import type { DisruptionInput, Plan, PlanSelection, RequestInput, Run } from "@/lib/contracts";
 import type { ApprovalGate } from "./derive";
+import { PRESET_TEXT, SIMPLE_PRESET_TEXT } from "@/lib/fixtures";
 import { PHASE_META, activePlan, formatCents, formatLocal } from "./format";
 import { cx } from "./ui";
 
@@ -92,9 +93,9 @@ function rowFor(run: Run, s: PlanSelection): Row {
   const detail: string[] = [];
   if (s.group === "meals") {
     detail.push(`${mealCount(s)} meals (${s.coverage.meal_vegetarian ?? 0} vegetarian)`);
-    if (time) detail.push(`${offer?.fulfillment.mode === "pickup_only" ? "ready" : "arrives"} ${time}`);
+    if (time) detail.push(`${offer?.fulfillment.mode === "pickup_only" ? "picked up at" : "at your hall by"} ${time}`);
   } else if (s.group === "delivery" && time) {
-    detail.push(`arrives ${time}`);
+    detail.push(`at your hall by ${time}`);
   }
   return { role: GROUP_WORD[s.group], name: s.merchantName, detail: detail.length ? detail.join(" · ") : null, price: formatCents(s.totalCents) };
 }
@@ -108,13 +109,35 @@ function Dot({ tone = "mint" }: { tone?: "mint" | "muted" }) {
   return <span aria-hidden className={cx("mt-[9px] inline-block h-1.5 w-1.5 shrink-0 rounded-full", tone === "mint" ? "bg-mint" : "bg-muted/60")} />;
 }
 
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Why a supplier that did NOT cancel or run late was still swapped out, in plain words.
+ * Reuses the fact the server already derived for the plan ("Keeping X would exceed the budget by $Y"
+ * or "Keeping X fails <timing checks>", the note the full console shows as "Widened repair").
+ * Returns null when that note does not name the supplier or gives another reason: never guessed.
+ */
+function swapReason(plan: Plan, from: string): string | null {
+  const note = plan.changeSummary.widened;
+  if (!note) return null;
+  const name = escapeRe(from);
+  if (new RegExp(`Keeping ${name} would exceed the budget by`).test(note)) return "to stay within the budget";
+  const fails = new RegExp(`Keeping ${name} fails ([a-z_, ]+?)(?:;|\\.)`).exec(note)?.[1];
+  if (fails) {
+    const codes = fails.split(",").map((c) => c.trim());
+    if (codes.length && codes.every((c) => c === "arrival_too_late" || c === "pickup_too_late")) return "so everything is there on time";
+  }
+  return null;
+}
+
 function changeSentences(plan: Plan): string[] {
   const out: string[] = [];
   const groupOf = (name: string) => plan.selections.find((s) => s.merchantName === name)?.group;
   for (const r of plan.changeSummary.replaced) {
     const g = groupOf(r.to);
     const what = g === "delivery" ? "Delivery" : g === "drinks_consumables" ? "Drinks and plates" : "Food";
-    out.push(`${what} now comes from ${r.to} instead of ${r.from}.`);
+    const reason = swapReason(plan, r.from);
+    out.push(`${what} now comes from ${r.to} instead of ${r.from}${reason ? `, ${reason}` : ""}.`);
   }
   const replacedTo = new Set(plan.changeSummary.replaced.map((r) => r.to));
   for (const name of plan.changeSummary.added) if (!replacedTo.has(name)) out.push(`${name} joins the plan.`);
@@ -169,7 +192,7 @@ function PlanList({ run, plan }: { run: Run; plan: Plan }) {
           {refunds.map((o) => (
             <li key={o.id} className="flex gap-3 text-[15px] leading-relaxed text-text">
               <Dot />
-              <span>{`${formatCents(o.cancellation!.refundCents)} comes back to you from ${o.merchantName}.`}</span>
+              <span>{`You would get ${formatCents(o.cancellation!.refundCents)} back from ${o.merchantName}.`}</span>
             </li>
           ))}
         </ul>
@@ -182,14 +205,16 @@ function PlanList({ run, plan }: { run: Run; plan: Plan }) {
 function ApproveButton({ gate, onApprove, busy }: { gate: ApprovalGate; onApprove: () => void; busy: boolean }) {
   return (
     <button type="button" className={cx(BIG_BUTTON, PRIMARY, "mt-7 w-full sm:w-auto")} disabled={!gate.enabled} onClick={onApprove}>
-      {busy ? "Saving…" : "Approve this plan"}
+      {busy ? "Saving…" : "Yes, use this plan"}
     </button>
   );
 }
 
 function AskStep({ run, busy, onFind }: { run: Run; busy: boolean; onFind: (input: RequestInput, changed: boolean) => void }) {
   const id = useId();
-  const [text, setText] = useState(run.request.text);
+  // The stored example is written for the full console; here the same request is offered in plain words.
+  // Submitting it counts as a change, so it goes in as a new request before the plan is searched for.
+  const [text, setText] = useState(run.request.text === PRESET_TEXT ? SIMPLE_PRESET_TEXT : run.request.text);
   const [eventDate, setEventDate] = useState(run.request.eventDate);
   const [nowLocal, setNowLocal] = useState(run.request.nowLocal);
   const changed = text.trim() !== run.request.text || eventDate !== run.request.eventDate || nowLocal !== run.request.nowLocal;
@@ -210,7 +235,7 @@ function AskStep({ run, busy, onFind }: { run: Run; busy: boolean; onFind: (inpu
           Tell us about your event
         </label>
         <textarea id={`${id}-text`} value={text} onChange={(e) => setText(e.target.value)} rows={5} className={cx(FIELD, "resize-y leading-relaxed")} disabled={busy} spellCheck />
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
           <div>
             <label htmlFor={`${id}-date`} className={LABEL}>
               Day of the event
@@ -219,16 +244,16 @@ function AskStep({ run, busy, onFind }: { run: Run; busy: boolean; onFind: (inpu
           </div>
           <div>
             <label htmlFor={`${id}-time`} className={LABEL}>
-              Time it is now (pretend)
+              Pretend it is this time on the day
             </label>
             <input id={`${id}-time`} type="time" step={60} value={nowLocal} onChange={(e) => setNowLocal(e.target.value)} className={FIELD} disabled={busy} required />
           </div>
         </div>
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-          <button type="submit" className={cx(BIG_BUTTON, PRIMARY, "w-full sm:w-auto")} disabled={!canFind}>
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5 lg:flex-col lg:items-stretch lg:gap-3">
+          <button type="submit" className={cx(BIG_BUTTON, PRIMARY, "w-full whitespace-nowrap sm:w-auto lg:w-full")} disabled={!canFind}>
             Find me a plan
           </button>
-          <p className="text-center text-[14px] text-muted sm:text-left">Try the example, or write your own.</p>
+          <p className="text-center text-[14px] text-muted sm:text-left lg:text-center">Try the example, or write your own.</p>
         </div>
       </form>
     </Step>
@@ -340,7 +365,7 @@ function ChangeStep({ run, pending, onDisrupt }: { run: Run; pending: string | n
       ) : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button type="button" className={cx(BIG_BUTTON, SECONDARY, "w-full")} disabled={!enabled || !meal} onClick={() => meal && onDisrupt({ type: "supplier_unavailable", merchantId: meal.merchantId })}>
-          A supplier cancelled
+          The food place cancelled
         </button>
         <button
           type="button"
@@ -403,10 +428,12 @@ export function SimpleView({
 }) {
   const busy = pending !== null || PHASE_META[run.phase].busy || run.job !== null;
   return (
-    <main className="mx-auto w-full max-w-[720px] flex-1 px-4 pb-24 pt-8 text-[17px] sm:px-6 sm:pt-20">
+    <main data-phase={run.phase} className="mx-auto w-full max-w-[720px] flex-1 px-4 pb-24 pt-8 text-[17px] sm:px-6 sm:pt-20 lg:max-w-[1200px] lg:px-8 lg:pt-16">
       <h1 className="text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-text sm:text-[44px]">Plan the food for your event</h1>
-      <p className="mt-3 max-w-[46ch] text-[17px] leading-relaxed text-muted sm:mt-4 sm:text-[19px]">Tell us what you need. We find suppliers and put a plan together. You decide.</p>
-      <div className="mt-10 grid gap-6 sm:mt-14">
+      <p className="mt-3 max-w-[46ch] text-[17px] leading-relaxed text-muted sm:mt-4 sm:text-[19px]">Tell us what you need. We ask food places and delivery companies, then put a plan together. You decide.</p>
+      {/* Below lg: one column, steps in order. lg and up: step 1 sticks on the left; steps 2 and 3 stack on the right. */}
+      <div className="mt-10 grid gap-6 sm:mt-14 lg:grid-cols-12 lg:items-start lg:gap-x-8">
+        <div className="lg:sticky lg:top-[88px] lg:col-span-5">
         <AskStep
           key={`${run.id}:${run.requestVersion}`}
           run={run}
@@ -416,8 +443,11 @@ export function SimpleView({
             await onConfirm();
           }}
         />
-        <PlanStep run={run} gate={gate} pending={pending} onApprove={onApprove} onBudget={onBudget} />
-        <ChangeStep key={`${run.id}:${run.requestVersion}:${activePlan(run)?.revision ?? 0}`} run={run} pending={pending} onDisrupt={onDisrupt} />
+        </div>
+        <div className="grid gap-6 lg:col-span-7">
+          <PlanStep run={run} gate={gate} pending={pending} onApprove={onApprove} onBudget={onBudget} />
+          <ChangeStep key={`${run.id}:${run.requestVersion}:${activePlan(run)?.revision ?? 0}`} run={run} pending={pending} onDisrupt={onDisrupt} />
+        </div>
       </div>
     </main>
   );

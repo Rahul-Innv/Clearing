@@ -7,6 +7,13 @@ import type { RequestInput } from "./contracts";
 export const PRESET_TEXT =
   "Dinner for 60 hackathon attendees at our already-booked venue. At least 20 need vegetarian meals; the rest are flexible. Include nonalcoholic drinks, plates, and utensils. Everything ready by 6:30 PM. Maximum $1,000 including all fees and delivery.";
 
+/**
+ * The same request in plain words, prefilled in the Simple view only. The local rules read it
+ * into exactly the same requirements as PRESET_TEXT (asserted in tests/interpret.test.ts).
+ */
+export const SIMPLE_PRESET_TEXT =
+  "Dinner for 60 people at our hall. At least 20 need vegetarian meals. Include soft drinks, plates and forks. Everything ready by 6:30 PM. Spend at most $1,000 in total.";
+
 /** Fixed wall-clock used by tests: 2026-10-16 14:00 America/Los_Angeles (21:00Z). */
 export const FIXED_NOW_ISO = "2026-10-16T21:00:00.000Z";
 export const FIXED_EVENT_DATE = "2026-10-16";

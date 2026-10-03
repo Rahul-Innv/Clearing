@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CATALOG, DEMO_VENUE, PUBLIC_CATALOG } from "../src/lib/catalog";
 import { Requirements } from "../src/lib/contracts";
-import { DEFAULT_TIMEZONE, FIXED_EVENT_DATE, MERCHANT_IDS as M, PRESET_TEXT, REQUESTS, presetRequest } from "../src/lib/fixtures";
+import { DEFAULT_TIMEZONE, FIXED_EVENT_DATE, MERCHANT_IDS as M, PRESET_TEXT, REQUESTS, SIMPLE_PRESET_TEXT, presetRequest } from "../src/lib/fixtures";
 import { DEFAULT_SETUP_BUFFER_MINUTES, buildRequirements, extractLocal, fromModelOutput, interpretLocal } from "../src/lib/interpret";
 import { discountedUnit, formatCents, parseDollarsToCents, pctOf } from "../src/lib/money";
 import { addMinutes, formatLocal, fromMinutes, nextDemoEventDate, parseLooseTime, toMinutes } from "../src/lib/time";
@@ -54,6 +54,33 @@ describe("interpretLocal: the preset request", () => {
   it("derives the demand the solver uses", () => {
     const d = deriveDemand(req);
     expect([d.headcount, d.vegetarianMin, d.budgetCents, d.latestArrivalMin]).toEqual([60, 20, 100_000, 18 * 60 + 10]);
+  });
+});
+
+describe("interpretLocal: the Simple view's plain-words example", () => {
+  it("is the exact sentence the Simple view prefills", () => {
+    expect(SIMPLE_PRESET_TEXT).toBe(
+      "Dinner for 60 people at our hall. At least 20 need vegetarian meals. Include soft drinks, plates and forks. Everything ready by 6:30 PM. Spend at most $1,000 in total.",
+    );
+  });
+
+  it("yields exactly the same requirements as the original preset text", () => {
+    const plain = interpretLocal(presetRequest({ text: SIMPLE_PRESET_TEXT }));
+    const original = interpretLocal(presetRequest({ text: PRESET_TEXT }));
+    expect(plain.headcount).toBe(60);
+    expect(plain.vegetarianMin).toBe(20);
+    expect(plain.readyByLocal).toBe("18:30");
+    expect(plain.budgetCents).toBe(100_000);
+    expect(plain.items).toEqual({ drinks: true, plates: true, utensils: true });
+    expect(plain.missing).toEqual([]);
+    expect(plain).toEqual(original);
+  });
+
+  it("reads the new everyday words", () => {
+    expect(extractLocal("Lunch for 12 people with forks.").wantsUtensils).toBe(true);
+    expect(extractLocal("Lunch for 12 people, silverware please.").wantsUtensils).toBe(true);
+    expect(extractLocal("Lunch for 12 people and some drinks.").wantsDrinks).toBe(true);
+    expect(extractLocal("Lunch for 12 people, about $5 each for drinks. Spend at most $250 in total.").budgetCents).toBe(25_000);
   });
 });
 

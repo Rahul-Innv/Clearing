@@ -110,6 +110,29 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
     });
   }, []);
   const simple = view === "simple";
+  /** After a successful reset everyone lands back on the Simple view, unless the URL asks for the full one. */
+  const backToSimpleAfterReset = useCallback(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("view") === "full") return;
+    } catch {
+      // no URL access: treat as no request for the full view
+    }
+    try {
+      window.localStorage.removeItem(VIEW_KEY);
+    } catch {
+      // storage blocked: nothing remembered to clear
+    }
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("view")) {
+        url.searchParams.set("view", "simple");
+        window.history.replaceState(null, "", url);
+      }
+    } catch {
+      // URL not updated; harmless
+    }
+    setView("simple");
+  }, []);
   const { run, events, status, connection, pending, notice, commands, refreshStatus, dismissNotice } = stream;
   const [selected, setSelected] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
@@ -295,14 +318,16 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
 
       <Modal open={resetOpen} onClose={() => setResetOpen(false)} labelledBy="reset-title">
         <h2 id="reset-title" className="text-base font-semibold">
-          Reset the demo?
+          {simple ? "Start over?" : "Reset the demo?"}
         </h2>
         <p className="mt-1.5 text-[13px] leading-snug text-muted">
-          Deletes this run, its events and its simulated orders, then recreates the editable preset request. Nothing real is affected.
+          {simple
+            ? "This clears your plan and brings back the example. It is only practice, so nothing real changes."
+            : "Deletes this run, its events and its simulated orders, then recreates the editable preset request. Nothing real is affected."}
         </p>
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setResetOpen(false)} data-autofocus>
-            Keep run
+            {simple ? "Keep my plan" : "Keep run"}
           </Button>
           <Button
             variant="danger"
@@ -310,10 +335,12 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
             onClick={() => {
               setResetOpen(false);
               setSelected(null);
-              void commands.reset();
+              void commands.reset().then((ok) => {
+                if (ok) backToSimpleAfterReset();
+              });
             }}
           >
-            Reset run
+            {simple ? "Start over" : "Reset run"}
           </Button>
         </div>
       </Modal>

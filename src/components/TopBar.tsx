@@ -17,10 +17,12 @@ export function PhaseChip({ phase }: { phase: Phase }) {
 
 export function SimulationBadge({ reasoning, runtime = "server" }: { reasoning?: "local" | "live"; runtime?: ClientRuntimeMode }) {
   const reasoningLabel = reasoning === "live" ? "Live model (unverified)" : "Local rules";
+  const text = `Demo suppliers · ${reasoningLabel} · Simulated orders${runtime === "browser" ? " · Browser runtime" : ""}`;
+  // Wraps inside its own border on narrow screens (never clipped, never overlapping its neighbours).
   return (
-    <span className="inline-flex h-6 items-center gap-1.5 rounded-md border border-dashed border-amber/50 px-2 text-xs font-medium text-amber">
-      <Glyph name="warn" />
-      Demo suppliers · {reasoningLabel} · Simulated orders{runtime === "browser" ? " · Browser runtime" : ""}
+    <span title={text} className="inline-flex min-h-6 max-w-full items-center gap-1.5 rounded-md border border-dashed border-amber/50 px-2 py-0.5 text-xs font-medium leading-snug text-amber">
+      <Glyph name="warn" className="shrink-0" />
+      <span className="min-w-0">{text}</span>
     </span>
   );
 }
@@ -151,6 +153,9 @@ export function TopBar({
   view?: "simple" | "full";
   onToggleView?: () => void;
 }) {
+  // The Simple view keeps only what a first-time visitor needs: the name, the honesty badge (plus one
+  // plain line), the details toggle and "Start over". Phase, connection, integrations and help stay in the full view.
+  const simple = view === "simple";
   return (
     <header className="relative z-30 flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line bg-surface px-4 py-2">
       <div className="flex min-w-0 flex-1 basis-0 items-center gap-2.5 sm:flex-none sm:basis-auto">
@@ -163,10 +168,11 @@ export function TopBar({
           </svg>
           Clearing
         </span>
-        {phase ? <PhaseChip phase={phase} /> : null}
+        {phase && !simple ? <PhaseChip phase={phase} /> : null}
       </div>
-      <div className="order-last w-full sm:order-none sm:w-auto">
+      <div className={cx("order-last w-full min-w-0 sm:order-none sm:w-auto", simple && "flex flex-wrap items-center gap-x-3 gap-y-1 sm:min-w-0 sm:flex-1")}>
         <SimulationBadge reasoning={status?.reasoning.mode} runtime={runtime} />
+        {simple ? <span className="text-[13px] leading-snug text-muted">Practice mode: pretend suppliers, nothing is really ordered.</span> : null}
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
         {view && onToggleView ? (
@@ -174,15 +180,19 @@ export function TopBar({
             {view === "simple" ? "Show details" : "Simple view"}
           </Button>
         ) : null}
-        <ConnectionState connection={connection} />
-        <IntegrationPopover status={status} onOpen={onStatusOpen} runtime={runtime} />
-        <span className="hidden sm:block">
-          <Button variant="ghost" size="sm" onClick={onHelp} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
-            <Kbd>?</Kbd>
-          </Button>
-        </span>
-        <Button variant="secondary" size="sm" onClick={onReset} disabled={resetDisabled} title="Reset the demo (r)">
-          Reset
+        {simple ? null : (
+          <>
+            <ConnectionState connection={connection} />
+            <IntegrationPopover status={status} onOpen={onStatusOpen} runtime={runtime} />
+            <span className="hidden sm:block">
+              <Button variant="ghost" size="sm" onClick={onHelp} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+                <Kbd>?</Kbd>
+              </Button>
+            </span>
+          </>
+        )}
+        <Button variant="secondary" size="sm" onClick={onReset} disabled={resetDisabled} title={simple ? "Start over with the example" : "Reset the demo (r)"}>
+          {simple ? "Start over" : "Reset"}
         </Button>
       </div>
     </header>

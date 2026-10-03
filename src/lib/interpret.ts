@@ -49,15 +49,16 @@ export function extractLocal(text: string): Extracted {
   const timeMatch = /(?:ready|set ?up|arrive|delivered|deliver|by)\s+(?:by\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)/i.exec(t);
   const readyByLocal = timeMatch?.[1] ? parseLooseTime(timeMatch[1]) : null;
 
-  const budgetMatch = /(?:max(?:imum)?|budget|under|up to|no more than|cap(?:ped)? at)\s*(?:of\s*)?(\$\s?[\d,]+(?:\.\d{1,2})?)/i.exec(t) ?? /(\$\s?[\d,]+(?:\.\d{1,2})?)/.exec(t);
+  const budgetMatch = /(?:max(?:imum)?|budget|under|up to|at most|no more than|cap(?:ped)? at)\s*(?:of\s*)?(\$\s?[\d,]+(?:\.\d{1,2})?)/i.exec(t) ?? /(\$\s?[\d,]+(?:\.\d{1,2})?)/.exec(t);
   const budgetCents = budgetMatch?.[1] ? parseDollarsToCents(budgetMatch[1]) : null;
 
+  // "soft drinks" and plain "drinks" both match /drink/.
   const wantsDrinks = /drink|beverage|water|soda/.test(lower);
   const wantsPlates = /plate/.test(lower);
-  const wantsUtensils = /utensil|cutlery|fork|napkin/.test(lower);
+  const wantsUtensils = /utensil|cutlery|silverware|fork|napkin/.test(lower);
 
   const preferences: string[] = [];
-  if (/nonalcoholic|non-alcoholic|no alcohol/.test(lower)) preferences.push("Nonalcoholic drinks only");
+  if (/nonalcoholic|non-alcoholic|no alcohol|soft drinks?\b/.test(lower)) preferences.push("Nonalcoholic drinks only");
   if (/vegan/.test(lower)) preferences.push("Vegan options mentioned (not modelled separately)");
   if (/gluten/.test(lower)) preferences.push("Gluten-free mentioned (not modelled separately)");
 
