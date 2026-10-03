@@ -16,7 +16,7 @@ export function DiscoveryPanel({ run, events, onOpenOffer }: { run: Run; events?
   return (
     <section className="border-b border-line px-4 py-3" aria-label="Discovered suppliers">
       <div className="mb-1.5 flex items-baseline justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">Discovered suppliers</h3>
+        <h3 className="text-xs font-medium text-muted">Discovered suppliers</h3>
         {view?.ok ? <span className="num text-xs text-muted">{view.candidates.length} found</span> : null}
       </div>
       {!view ? (
@@ -66,7 +66,7 @@ export function DiscoveryPanel({ run, events, onOpenOffer }: { run: Run; events?
                         executable
                       </Chip>
                     ) : (
-                      <span title={c.note} className="inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-dashed border-line px-2 text-xs text-muted">
+                      <span title={c.note} className="inline-flex h-[22px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-dashed border-line px-2 text-xs text-muted">
                         <Glyph name="dash" />
                         candidate only
                       </span>

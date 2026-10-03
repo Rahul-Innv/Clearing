@@ -14,7 +14,7 @@ export function ServerModeNotice({ page }: { page: "agent" | "attendee" }) {
   if (process.env.NEXT_PUBLIC_CLEARING_RUNTIME !== "browser") return null;
   return (
     <div role="note" className={page === "attendee" ? "mx-auto w-full max-w-xl px-4 py-8" : "w-full"}>
-      <div className="flex gap-3 rounded-lg border border-amber/35 bg-amber/10 px-4 py-3 text-[13px] leading-snug text-text">
+      <div className="flex gap-3 rounded-md border border-amber/25 bg-amber/[0.06] px-4 py-3 text-[13px] leading-snug text-text">
         <Glyph name="warn" className="mt-[3px] text-amber" />
         <div className="min-w-0">
           <p className="font-semibold text-amber">Needs the server mode</p>

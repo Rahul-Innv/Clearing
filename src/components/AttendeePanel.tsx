@@ -79,7 +79,7 @@ export function AttendeePanel({ run, pending }: { run: Run; pending: string | nu
         ) : (
           <>
             <div>
-              <label htmlFor={`${id}-url`} className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+              <label htmlFor={`${id}-url`} className="mb-1.5 block text-xs font-medium text-muted">
                 Attendee link
               </label>
               <div className="flex gap-2">
@@ -102,7 +102,7 @@ export function AttendeePanel({ run, pending }: { run: Run; pending: string | nu
               </p>
             </div>
             <div>
-              <h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-muted">Counts so far</h3>
+              <h3 className="mb-1 text-xs font-medium text-muted">Counts so far</h3>
               <dl className="grid grid-cols-2 gap-x-5 border-y border-line" aria-label="Attendee counts">
                 {(
                   [

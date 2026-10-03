@@ -13,12 +13,12 @@ import { Glyph, SectionHeader, cx } from "./ui";
 const STATE_STYLE: Record<NodeState, { box: string; label: string; glyph: GlyphName; name: string; edge: { stroke: string; width: number; dash?: string; opacity: number } }> = {
   selected: { box: "border-mint bg-mint/[0.08]", label: "text-mint", glyph: "check", name: "text-text", edge: { stroke: "var(--color-mint)", width: 1.5, opacity: 0.85 } },
   replacement: { box: "border-mint border-dashed bg-mint/[0.05]", label: "text-mint", glyph: "swap", name: "text-text", edge: { stroke: "var(--color-mint)", width: 1.5, dash: "5 3", opacity: 0.85 } },
-  candidate: { box: "border-line bg-surface hover:border-muted/60", label: "text-accent", glyph: "ring", name: "text-text", edge: { stroke: "#56627c", width: 1, opacity: 0.9 } },
-  rejected: { box: "border-line bg-surface/70 hover:border-muted/60", label: "text-muted", glyph: "cross", name: "text-text/85", edge: { stroke: "#3a4762", width: 1, opacity: 0.9 } },
+  candidate: { box: "border-line bg-surface hover:border-muted/60", label: "text-accent", glyph: "ring", name: "text-text", edge: { stroke: "#4b4c53", width: 1, opacity: 0.9 } },
+  rejected: { box: "border-line bg-surface/70 hover:border-muted/60", label: "text-muted", glyph: "cross", name: "text-text/85", edge: { stroke: "#33343a", width: 1, opacity: 0.9 } },
   withdrawn: { box: "border-red/55 border-dashed bg-red/[0.05]", label: "text-red", glyph: "cross", name: "text-muted line-through decoration-red/70", edge: { stroke: "var(--color-red)", width: 1, dash: "3 3", opacity: 0.45 } },
   superseded: { box: "border-muted/40 border-dashed bg-transparent", label: "text-muted", glyph: "dash", name: "text-muted", edge: { stroke: "var(--color-muted)", width: 1, dash: "4 4", opacity: 0.35 } },
-  awaiting: { box: "border-line border-dotted bg-transparent", label: "text-muted", glyph: "half", name: "text-muted", edge: { stroke: "#3a4762", width: 1, dash: "1 4", opacity: 0.9 } },
-  no_quote: { box: "border-line border-dotted bg-transparent", label: "text-muted", glyph: "ring", name: "text-muted", edge: { stroke: "#3a4762", width: 1, dash: "1 4", opacity: 0.7 } },
+  awaiting: { box: "border-line border-dotted bg-transparent", label: "text-muted", glyph: "half", name: "text-muted", edge: { stroke: "#33343a", width: 1, dash: "1 4", opacity: 0.9 } },
+  no_quote: { box: "border-line border-dotted bg-transparent", label: "text-muted", glyph: "ring", name: "text-muted", edge: { stroke: "#33343a", width: 1, dash: "1 4", opacity: 0.7 } },
 };
 
 const OFFER_H = 54;
@@ -155,7 +155,7 @@ export function SignatureBanner({ run }: { run: Run }) {
     const inf = run.infeasibility;
     const ci = inf.cheapestInvalid;
     return (
-      <div role="status" className="@container mx-4 mt-3 rounded-lg border border-red/45 bg-red/[0.06] px-4 py-3">
+      <div role="status" className="@container mx-4 mt-3 rounded-md border border-red/35 bg-red/[0.06] px-4 py-3">
         <div className="flex flex-wrap items-start gap-x-8 gap-y-2">
           <div className="min-w-0 flex-[1_1_22rem]">
             <p className="flex items-center gap-2 text-lg font-semibold tracking-[0.06em] text-red @xl:text-xl">
@@ -223,7 +223,7 @@ function Progress({ run }: { run: Run }) {
             ? "Disruption recorded · invalidating affected selections"
             : "Repairing · preserving what still works";
   return (
-    <div role="status" className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/[0.05] px-4 py-2.5 text-[13px] text-text">
+    <div role="status" className="mx-4 mt-3 flex items-center gap-2 rounded-md border border-accent/25 bg-accent/[0.05] px-4 py-2.5 text-[13px] text-text">
       <Glyph name="half" className="pulse text-accent" />
       {label}
       <span className="ml-auto text-xs text-muted">Offer arrival is paced for readability</span>
@@ -342,7 +342,7 @@ export function MarketGraph({ run, nodes, onOpenOffer }: { run: Run; nodes: Mark
                     key={`e-${g}`}
                     d={curve(L.event.x + L.event.w, L.event.y + L.event.h / 2, gp.x, gp.y + gp.h / 2)}
                     fill="none"
-                    stroke={st.ok ? "var(--color-mint)" : "#56627c"}
+                    stroke={st.ok ? "var(--color-mint)" : "#4b4c53"}
                     strokeOpacity={st.ok ? 0.6 : 0.9}
                     strokeWidth={1}
                   />

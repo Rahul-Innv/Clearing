@@ -81,7 +81,7 @@ function IntegrationPopover({ status, onOpen, runtime }: { status: IntegrationSt
       <div
         id="integration-status"
         popover="auto"
-        className="top-popover w-[min(360px,calc(100vw-24px))] rounded-lg border border-line bg-surface p-0 text-text shadow-2xl shadow-black/50"
+        className="top-popover w-[min(360px,calc(100vw-24px))] rounded-lg border border-line bg-surface p-0 text-text shadow-xl shadow-black/40"
       >
         <div className="border-b border-line px-4 py-3">
           <p className="text-sm font-semibold">Integration status</p>
@@ -147,14 +147,14 @@ export function TopBar({
   runtime?: ClientRuntimeMode;
 }) {
   return (
-    <header className="relative z-30 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line bg-ink px-4 py-2">
+    <header className="relative z-30 flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line bg-surface px-4 py-2">
       <div className="flex min-w-0 flex-1 basis-0 items-center gap-2.5 sm:flex-none sm:basis-auto">
         <span className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight text-text">
           <svg width="18" height="18" viewBox="0 0 32 32" aria-hidden>
-            <path d="M13 16l6-6m-6 6l6 6" stroke="#a3a79f" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="9" cy="16" r="3.5" fill="#ede8df" />
+            <path d="M13 16l6-6m-6 6l6 6" stroke="#9c9da5" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="9" cy="16" r="3.5" fill="#ededef" />
             <circle cx="23" cy="10" r="3.5" fill="#5eead4" />
-            <circle cx="23" cy="22" r="3.5" fill="none" stroke="#a3a79f" strokeWidth="2" />
+            <circle cx="23" cy="22" r="3.5" fill="none" stroke="#9c9da5" strokeWidth="2" />
           </svg>
           Clearing
         </span>

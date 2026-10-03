@@ -161,7 +161,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
       )}
 
       {run ? (
-        <div ref={barRef} className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.45)] lg:hidden">
+        <div ref={barRef} className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-1px_0_rgba(255,255,255,0.02),0_-12px_32px_rgba(0,0,0,0.5)] lg:hidden">
           <div className="mb-2 flex items-center gap-2 text-[13px]">
             <span className="text-muted">{plan ? `Plan r${plan.revision}` : PHASE_META[run.phase].label}</span>
             {plan ? <span className="num font-semibold text-text">{formatCents(plan.totals.totalCents)}</span> : null}
@@ -189,7 +189,7 @@ export function Console({ source, banner }: { source?: StaticSource; banner?: Re
         <div
           role={notice.tone === "error" ? "alert" : "status"}
           className={cx(
-            "fixed right-4 z-40 w-[min(380px,calc(100vw-32px))] rounded-lg border bg-surface px-4 py-3 shadow-2xl shadow-black/50",
+            "fixed right-4 z-40 w-[min(380px,calc(100vw-32px))] rounded-lg border bg-surface-2 px-4 py-3 shadow-xl shadow-black/40",
             "bottom-40 lg:bottom-4",
             notice.tone === "error" ? "border-red/50" : "border-line",
           )}

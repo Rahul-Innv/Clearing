@@ -30,7 +30,7 @@ const STATE_GLYPH = {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="border-b border-line px-5 py-4">
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">{title}</h3>
+      <h3 className="mb-2 text-xs font-medium text-muted">{title}</h3>
       {children}
     </section>
   );

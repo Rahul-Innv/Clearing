@@ -18,11 +18,11 @@ const TONE_TEXT: Record<Tone, string> = {
 };
 
 const TONE_CHIP: Record<Tone, string> = {
-  neutral: "border-line bg-surface-2 text-muted",
-  mint: "border-mint/35 bg-mint/10 text-mint",
-  amber: "border-amber/35 bg-amber/10 text-amber",
-  red: "border-red/40 bg-red/10 text-red",
-  accent: "border-accent/35 bg-accent/10 text-accent",
+  neutral: "border-line bg-surface-2/60 text-muted",
+  mint: "border-mint/25 bg-mint/[0.07] text-mint",
+  amber: "border-amber/25 bg-amber/[0.07] text-amber",
+  red: "border-red/30 bg-red/[0.07] text-red",
+  accent: "border-accent/25 bg-accent/[0.07] text-accent",
 };
 
 export function toneText(t: Tone): string {
@@ -118,7 +118,7 @@ export function Chip({
   return (
     <span
       title={title}
-      className={cx("inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border px-2 text-xs font-medium leading-none", TONE_CHIP[tone], className)}
+      className={cx("inline-flex h-[22px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 text-xs font-medium leading-none", TONE_CHIP[tone], className)}
     >
       {glyph ? <Glyph name={glyph} className={pulse ? "pulse" : undefined} /> : null}
       {children}
@@ -129,11 +129,11 @@ export function Chip({
 /** Linear-style group header bar: title, count, optional trailing slot. */
 export function SectionHeader({ title, count, children, id }: { title: string; count?: ReactNode; children?: ReactNode; id?: string }) {
   return (
-    <div className="flex min-h-9 items-center gap-2 border-y border-line bg-surface-2/60 px-4 py-1.5">
-      <h2 id={id} className="text-[13px] font-semibold text-text">
+    <div className="flex min-h-10 items-center gap-2 border-y border-line/70 bg-surface-2/50 px-4 py-2">
+      <h2 id={id} className="text-[13px] font-medium tracking-[-0.01em] text-text">
         {title}
       </h2>
-      {count !== undefined ? <span className="num text-xs text-muted">{count}</span> : null}
+      {count !== undefined ? <span className="num text-xs text-muted/90">{count}</span> : null}
       {children ? <div className="ml-auto flex items-center gap-2">{children}</div> : null}
     </div>
   );
@@ -142,10 +142,10 @@ export function SectionHeader({ title, count, children, id }: { title: string; c
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
 const BUTTON_VARIANT: Record<ButtonVariant, string> = {
-  primary: "bg-mint text-ink hover:bg-mint/90 disabled:bg-surface-2 disabled:text-muted disabled:border-line border border-mint",
-  secondary: "border border-line bg-surface-2 text-text hover:border-muted/60 disabled:text-muted",
-  ghost: "border border-transparent text-muted hover:text-text hover:bg-surface-2 disabled:text-muted/70",
-  danger: "border border-red/50 bg-red/10 text-red hover:bg-red/20 disabled:text-muted disabled:border-line disabled:bg-transparent",
+  primary: "border border-mint bg-mint text-ink shadow-sm shadow-black/30 hover:bg-mint/90 disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none",
+  secondary: "border border-line bg-surface-2/70 text-text hover:border-muted/40 hover:bg-surface-2 disabled:text-muted disabled:hover:border-line",
+  ghost: "border border-transparent text-muted hover:bg-surface-2 hover:text-text disabled:text-muted/70",
+  danger: "border border-red/35 bg-red/[0.08] text-red hover:bg-red/15 disabled:border-line disabled:bg-transparent disabled:text-muted",
 };
 
 export function Button({
@@ -162,7 +162,7 @@ export function Button({
       {...rest}
       className={cx(
         "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed",
-        size === "sm" ? "h-7 px-2.5 text-xs" : "h-9 px-3.5 text-sm",
+        size === "sm" ? "h-7 px-2.5 text-xs" : "h-8 px-3 text-[13px]",
         BUTTON_VARIANT[variant],
         className,
       )}
@@ -173,7 +173,7 @@ export function Button({
 /** Label/value row (Linear profile panel). */
 export function KV({ label, children, emphasis, hint }: { label: ReactNode; children: ReactNode; emphasis?: boolean; hint?: ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 py-1">
+    <div className="flex items-baseline justify-between gap-3 py-1.5">
       <dt className="text-[13px] text-muted">
         {label}
         {hint ? <span className="ml-1 text-xs text-muted">{hint}</span> : null}
@@ -184,7 +184,7 @@ export function KV({ label, children, emphasis, hint }: { label: ReactNode; chil
 }
 
 export function Kbd({ children }: { children: ReactNode }) {
-  return <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-line bg-surface-2 px-1 font-mono text-xs text-muted">{children}</kbd>;
+  return <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-line bg-surface-2/70 px-1 font-mono text-[11px] text-muted">{children}</kbd>;
 }
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {

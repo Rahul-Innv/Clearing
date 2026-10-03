@@ -57,7 +57,7 @@ function Block({ title, children, aside }: { title: string; children: ReactNode;
   return (
     <section className="border-b border-line px-4 py-3">
       <div className="mb-1.5 flex items-baseline justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{title}</h3>
+        <h3 className="text-xs font-medium text-muted">{title}</h3>
         {aside}
       </div>
       {children}

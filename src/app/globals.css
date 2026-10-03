@@ -9,12 +9,13 @@
  * Every state is also carried by text and a shape glyph.
  */
 @theme {
-  --color-ink: #0b1220;
-  --color-surface: #121a2b;
-  --color-surface-2: #19233a;
-  --color-line: #263148;
-  --color-text: #ede8df;
-  --color-muted: #a3a79f;
+  /* Neutral near-black canvas, one step per surface, hairline borders (Linear / Vercel). */
+  --color-ink: #0c0d0f;
+  --color-surface: #121315;
+  --color-surface-2: #1a1b1e;
+  --color-line: #26272b;
+  --color-text: #ededef;
+  --color-muted: #9c9da5;
   --color-mint: #5eead4;
   --color-amber: #f5b451;
   --color-red: #f0655c;
@@ -43,6 +44,7 @@ body {
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
+  letter-spacing: -0.003em;
   -webkit-font-smoothing: antialiased;
   font-variant-numeric: tabular-nums;
 }
@@ -64,13 +66,18 @@ textarea {
   font: inherit;
 }
 
+dialog {
+  border-color: var(--color-line);
+}
+
 ::selection {
   background: color-mix(in oklab, var(--color-accent) 35%, transparent);
 }
 
 /* Native dialogs: side sheet and centred modal. */
 dialog::backdrop {
-  background: rgb(4 8 16 / 0.62);
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(2px);
 }
 
 dialog.sheet {
