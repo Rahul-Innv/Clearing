@@ -12,7 +12,7 @@ import { SCRATCH, phaseChip, watchConsole, type Phase } from "./helpers";
 test.describe.configure({ mode: "serial" });
 
 const BADGE = "Demo suppliers · Local rules · Simulated orders";
-const PRACTICE = "Practice mode: pretend suppliers, nothing is really ordered.";
+const PRACTICE = "Practice mode: pretend food places, nothing is really ordered.";
 const SIMPLE_BRIEF =
   "Dinner for 60 people at our hall. At least 20 need vegetarian meals. Include soft drinks, plates and forks. Everything ready by 6:30 PM. Spend at most $1,000 in total.";
 const JARGON = /\b(revisions?|r\d+|candidates?|feasible|solver|idempotent|exposure|slack|market cleared|offers?|negotiation|clearing|pipeline|simulated_confirmed)\b/i;

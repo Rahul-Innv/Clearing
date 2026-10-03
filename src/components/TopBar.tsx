@@ -173,7 +173,7 @@ export function TopBar({
       </div>
       <div className={cx("order-last w-full min-w-0 sm:order-none sm:w-auto", simple && "flex flex-wrap items-center gap-x-3 gap-y-1 sm:min-w-0 sm:flex-1")}>
         <SimulationBadge reasoning={status?.reasoning.mode} runtime={runtime} />
-        {simple ? <span className="text-[13px] leading-snug text-muted">Practice mode: pretend suppliers, nothing is really ordered.</span> : null}
+        {simple ? <span className="text-[14px] leading-snug text-text">Practice mode: pretend food places, nothing is really ordered.</span> : null}
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
         {view && onToggleView ? (
